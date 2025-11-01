@@ -7,6 +7,7 @@ type AlignItems = 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
 
 export const Container: React.FC<{
   children: ReactNode,
+  width?: number | string,
   justifyContent?: JustifyContent,
   alignItems?: AlignItems,
   paddingHorizontal?: number
@@ -19,6 +20,7 @@ export const Container: React.FC<{
 }> =
   ({
     children,
+    width = '100%',
     justifyContent,
     alignItems,
     paddingHorizontal = 15,
@@ -35,7 +37,7 @@ export const Container: React.FC<{
           display: 'flex',
           flexDirection: flexDirection,
           backgroundColor: backgroundColor,
-          width: '100%',
+          width: width,
           height: heigth,
           justifyContent: justifyContent,
           alignItems: alignItems,

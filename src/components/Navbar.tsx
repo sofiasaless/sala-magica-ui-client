@@ -1,6 +1,8 @@
 import { AppstoreFilled, BellOutlined, HeartFilled, HomeFilled, ShoppingCartOutlined, SmileFilled } from "@ant-design/icons";
 import { Badge, Button, Flex, Image, Tabs, type TabsProps } from "antd";
+import { useState } from "react";
 import logo from '../assets/icone reverso.png';
+import { Inicio } from "../pages/Inicio";
 import { colors } from "../theme/colors";
 import { Container } from "./Container";
 
@@ -9,6 +11,7 @@ const items: TabsProps['items'] = [
     key: 'inicio',
     label: 'Início',
     icon: <HomeFilled />,
+    // children: <Inicio />
   },
   {
     label: 'Produtos',
@@ -29,40 +32,57 @@ const items: TabsProps['items'] = [
 
 export const Navbar = () => {
 
+  const [activeKey, setActiveKey] = useState<string>("inicio");
+
   return (
-    <Container
-      justifyContent="space-between"
-      alignItems="center"
-      paddingVertical={0.5}
-      // position="fixed"
-    >
-      <Image
-        preview={false}
-        width={120}
-        src={logo}
-      />
-
-      <Tabs
-        // onClick={onClick}
-        size="middle"
-        defaultActiveKey={'inicio'}
-        destroyOnHidden
-        items={items}
-      />
-
-      <Flex
-        gap="middle"
+    <>
+      <Container
+        justifyContent="space-between"
+        alignItems="center"
+        paddingVertical={0.5}
       >
-        <Badge count={2} color="#ff4d4f">
-          <Button type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"} />
-        </Badge>
+        <Image
+          preview={false}
+          width={120}
+          src={logo}
+        />
 
-        <Badge count={9} color="#ff4d4f">
-          <Button type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}/>
+        <Tabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          size="middle"
+          defaultActiveKey={'inicio'}
+          destroyOnHidden
+          items={items}
+        />
 
-        </Badge>
-      </Flex>
-    </Container>
+        <Flex
+          gap="middle"
+        >
+          <Badge count={2} color="#ff4d4f">
+            <Button type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"} />
+          </Badge>
+
+          <Badge count={9} color="#ff4d4f">
+            <Button type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"} />
+
+          </Badge>
+        </Flex>
+      </Container>
+
+      <Container
+        flexDirection="column"
+        paddingHorizontal={0}
+        paddingVertical={0}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {activeKey === "inicio" && <Inicio />}
+        {activeKey === "produtos" && <div>Lista de produtos</div>}
+        {activeKey === "favoritos" && <div>Seus favoritos</div>}
+        {activeKey === "perfil" && <div>Perfil do usuário</div>}
+      </Container>
+    </>
   )
 
 }

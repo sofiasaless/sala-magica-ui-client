@@ -6,6 +6,7 @@ import { CardServico, type ServicoType } from "../components/CardServico";
 import { Divisor } from "../components/Divisor";
 import { colors } from "../theme/colors";
 import { CardProduto } from "../components/CardProduto";
+import FormularioEncomenda from "../components/FormularioEncomenda";
 
 const { Title } = Typography;
 
@@ -74,6 +75,7 @@ export const Inicio = () => {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        gap={20}
       >
         <Divisor 
           titulo="Enfeites de parede"
@@ -91,6 +93,41 @@ export const Inicio = () => {
           <CardProduto />
           <CardProduto />
         </Flex>
+
+        <Divisor 
+          titulo="Materiais educativos"
+          props={{
+            orientation:"left",
+            variant:'solid'
+          }}
+          corBorda={colors.backgroundMain}
+          corTitulo={colors.backgroundMain}
+        />
+
+        <Flex gap={"large"}>
+          <CardProduto />
+          <CardProduto />
+          <CardProduto />
+          <CardProduto />
+        </Flex>
+      </Container>
+
+      <Container
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="column"
+        gap={15}
+      >
+        <Divisor 
+          titulo="Encomendas personalizadas"
+        />
+        <Divisor 
+          titulo="E que tal um enfeite exclusivo para sua sala de aula? Basta preencher o  formulário abaixo com os detalhes do que deseja e entraremos em contato  para alinhar os detalhes da sua encomenda."
+          tamanhoTitulo={'body'}
+          expessuraFonte={400}
+          width={50}
+        />
+        <FormularioEncomenda />
       </Container>
     </>
   )
