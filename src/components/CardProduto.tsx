@@ -8,7 +8,7 @@ const { Meta } = Card;
 export const CardProduto = () => {
   return (
     <Card
-      style={{ width: 280 }}
+      style={{ width: 230 }}
       cover={
         <img
           draggable={false}
@@ -25,7 +25,7 @@ export const CardProduto = () => {
         title={
           <span style={{
             color: 'black',
-            fontSize: font.h4,
+            fontSize: font.h5,
             // fontWeight: 600
           }}>
             Calendário tema azul

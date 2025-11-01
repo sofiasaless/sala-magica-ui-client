@@ -1,15 +1,14 @@
 import { Container } from "../components/Container";
 
 import { BulbOutlined, CrownOutlined, HighlightOutlined } from "@ant-design/icons";
-import { AutoComplete, Flex, Input, Typography } from 'antd';
+import { Flex } from 'antd';
+import { AreaPesquisaProdutos } from "../components/AreaPesquisaProdutos";
+import { CardProduto } from "../components/CardProduto";
 import { CardServico, type ServicoType } from "../components/CardServico";
 import { Divisor } from "../components/Divisor";
-import { colors } from "../theme/colors";
-import { CardProduto } from "../components/CardProduto";
 import FormularioEncomenda from "../components/FormularioEncomenda";
-import { SiteFooter } from "../components/SiteFooter";
+import { colors } from "../theme/colors";
 
-const { Title } = Typography;
 
 const servicoes_prestados: ServicoType[] = [
   {
@@ -38,16 +37,7 @@ export const Inicio = () => {
         flexDirection="column"
         alignItems="center"
       >
-        <Title level={2}>Transforme sua sala de aula com encanto</Title>
-        <AutoComplete
-          popupMatchSelectWidth={252}
-          style={{ width: 350 }}
-        // options={options}
-        // onSelect={onSelect}
-        // onSearch={handleSearch}
-        >
-          <Input.Search size="large" placeholder="O que você quer encontrar hoje?" enterButton />
-        </AutoComplete>
+        <AreaPesquisaProdutos />
       </Container>
 
       <Container
@@ -130,8 +120,6 @@ export const Inicio = () => {
         />
         <FormularioEncomenda />
       </Container>
-
-      <SiteFooter />
     </>
   )
 }

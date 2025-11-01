@@ -5,13 +5,15 @@ import logo from '../assets/icone reverso.png';
 import { Inicio } from "../pages/Inicio";
 import { colors } from "../theme/colors";
 import { Container } from "./Container";
+import { Produtos } from "../pages/Produtos";
+import { Favoritos } from "../pages/Favoritos";
+import { Perfil } from "../pages/Perfil";
 
 const items: TabsProps['items'] = [
   {
     key: 'inicio',
     label: 'Início',
-    icon: <HomeFilled />,
-    // children: <Inicio />
+    icon: <HomeFilled />
   },
   {
     label: 'Produtos',
@@ -78,9 +80,9 @@ export const Navbar = () => {
         justifyContent="center"
       >
         {activeKey === "inicio" && <Inicio />}
-        {activeKey === "produtos" && <div>Lista de produtos</div>}
-        {activeKey === "favoritos" && <div>Seus favoritos</div>}
-        {activeKey === "perfil" && <div>Perfil do usuário</div>}
+        {activeKey === "produtos" && <Produtos />}
+        {activeKey === "favoritos" && <Favoritos />}
+        {activeKey === "perfil" && <Perfil />}
       </Container>
     </>
   )

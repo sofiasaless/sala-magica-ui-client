@@ -13,7 +13,10 @@ createRoot(document.getElementById('root')!).render(
           colorPrimary: colors.primary,
           colorPrimaryBgHover: colors.primaryLighter,
           colorPrimaryBorder: colors.primaryLight,
-          fontFamily: "'Fredoka', sans-serif"
+          fontFamily: "'Fredoka', sans-serif",
+          colorError: colors.error,
+          colorErrorActive: colors.error,
+          colorErrorBgHover: colors.error
         },
       }}
     >
