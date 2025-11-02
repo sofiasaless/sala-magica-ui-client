@@ -8,6 +8,9 @@ import { Container } from "./Container";
 import { Produtos } from "../pages/Produtos";
 import { Favoritos } from "../pages/Favoritos";
 import { Perfil } from "../pages/Perfil";
+import { Carrinho } from "../pages/Carrinho";
+import {Notificacoes} from "../pages/Notificacoes";
+import { DetalheProduto } from "../pages/DetalheProduto";
 
 const items: TabsProps['items'] = [
   {
@@ -62,12 +65,17 @@ export const Navbar = () => {
           gap="middle"
         >
           <Badge count={2} color="#ff4d4f">
-            <Button type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"} />
+            <Button
+              type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
+              onClick={() => setActiveKey('carrinho')}
+            />
           </Badge>
 
           <Badge count={9} color="#ff4d4f">
-            <Button type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"} />
-
+            <Button
+              type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
+              onClick={() => setActiveKey('notificacoes')}
+            />
           </Badge>
         </Flex>
       </Container>
@@ -83,6 +91,9 @@ export const Navbar = () => {
         {activeKey === "produtos" && <Produtos />}
         {activeKey === "favoritos" && <Favoritos />}
         {activeKey === "perfil" && <Perfil />}
+        {activeKey === "carrinho" && <Carrinho />}
+        {/* {activeKey === "notificacoes" && <Notificacoes />} */}
+        {activeKey === "notificacoes" && <DetalheProduto />}
       </Container>
     </>
   )
