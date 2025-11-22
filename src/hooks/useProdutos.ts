@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { ProdutoService } from "../service/produto.service";
-import type { PageProductResponse } from "../types/produto.type";
+import type { PageProductResponse, Produto } from "../types/produto.type";
 import type { PaginacaoProps } from "../api/modules/produtos.api";
 
 export function useProdutos() {
   const [produtosPaginados, setProdutosPaginados] = useState<Map<string, PageProductResponse>>();
   const [totalProdutos, setTotalProdutos] = useState<number>()
+
+  const [produto, setProduto] = useState<Produto>()
+  const [carregando, setCarregando] = useState<boolean>(false)
 
   async function paginarFiltrado(param: {
     limite: number, categoria: string, ordem: string
@@ -42,5 +45,21 @@ export function useProdutos() {
     setTotalProdutos(resultado.total)
   }
 
-  return { produtosPaginados, paginarFiltrado, paginar, carregarTotalProdutos, totalProdutos };
+  async function buscarProduto(id: string) {
+    setCarregando(true)
+    const resultado = await ProdutoService.encontrarProdutoPorId(id)
+    setProduto(resultado)
+    setCarregando(false)
+  }
+
+  return {
+    carregando,
+    produtosPaginados, 
+    paginarFiltrado, 
+    paginar, 
+    carregarTotalProdutos, 
+    totalProdutos,
+    buscarProduto,
+    produto
+  };
 }

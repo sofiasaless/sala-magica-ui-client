@@ -1,4 +1,4 @@
-import type { PageProductResponse } from "../../types/produto.type";
+import type { PageProductResponse, Produto } from "../../types/produto.type";
 import { api } from "../axios";
 
 export interface PaginacaoProps {
@@ -26,14 +26,16 @@ export const produtosApi = {
       if (page.filtro.ordem != '') filtragem += `&ordem=${page.filtro.ordem}`
     }
 
-    console.info('requisição indo a api ----> ', `/products/page?limit=${page.limit}${filtragem}${paginacao}`)
+    // console.info('requisição indo a api ----> ', `/products/page?limit=${page.limit}${filtragem}${paginacao}`)
 
     return api.get<PageProductResponse>(`/products/page?limit=${page.limit}${filtragem}${paginacao}`)
   },
 
   paginarFiltrado: (limit: number, categoria: string, ordem: string) => api.get<PageProductResponse>(`/products/page?limit=${limit}&categoria=${categoria}&ordem=${ordem}`),
 
-  contarProdutos: () => api.get<{total: number}>(`/products/count`)
+  contarProdutos: () => api.get<{total: number}>(`/products/count`),
+
+  encontrarPorId: (id: string) => api.get<Produto>(`/products/find/${id}`)
 
 
 };

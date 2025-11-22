@@ -5,10 +5,30 @@ import { font } from "../theme/font";
 import { HeartOutlined, ShareAltOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { Divisor } from "../components/Divisor";
 import { CardProduto } from "../components/CardProduto";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useProdutos } from "../hooks/useProdutos";
 
 const { Text } = Typography;
 
 export const DetalheProduto = () => {
+
+  const { id } = useParams()
+
+  const navigator = useNavigate()
+
+  const { produto, buscarProduto, produtosPaginados, paginar } = useProdutos()
+
+  useEffect(() => {
+    if (id) buscarProduto(id)
+    paginar({
+      limit: 4,
+      params: {
+        navigation: 'first'
+      }
+    })
+  }, [id])
+
   return (
     <>
       <Container
@@ -27,29 +47,24 @@ export const DetalheProduto = () => {
             <Flex>
               <Image
                 width={350}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+                src={produto?.imagemCapa}
               />
             </Flex>
             <Flex gap={'middle'}>
-              <Image
-                width={100}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-              <Image
-                width={100}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-              <Image
-                width={100}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
+              {produto?.imagens?.map((imagem, indice) => (
+                <Image
+                  key={indice}
+                  width={100}
+                  src={imagem}
+                />
+              ))}
             </Flex>
           </Flex>
 
           <Flex vertical justify="center" gap={"large"}>
             <Flex vertical>
-              <Text style={{ fontSize: font.h3 }}>Calendário tema azul</Text>
-              <Text style={{ fontSize: font.h4, color: colors.secondary }}>R$ 50,00</Text>
+              <Text style={{ fontSize: font.h3 }}>{produto?.titulo}</Text>
+              <Text style={{ fontSize: font.h4, color: colors.secondary }}>R$ {produto?.preco.toFixed(2)}</Text>
             </Flex>
 
             <Flex gap={"small"}>
@@ -59,7 +74,7 @@ export const DetalheProduto = () => {
 
             <Flex gap={"small"}>
               <Button type="dashed" size="large" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: font.h4 }} />} />
-              <Button type="primary" size="large">Encomendar produto</Button>
+              <Button type="primary" size="large" onClick={() => console.info(produto)}>Encomendar produto</Button>
             </Flex>
           </Flex>
 
@@ -73,29 +88,29 @@ export const DetalheProduto = () => {
           justifyContent="space-around"
           gap={50}
         >
-          <Flex vertical>
+          <Flex vertical style={{ flex: 1 }}>
             <Divisor
               titulo="Descrição do produto"
               tamanhoTitulo={font.body}
             />
-            <Text style={{ textAlign: 'center' }}>Feito com material EVA, o calendário pode ser fixado na parede e é  excelente para interação com as crianças ao abordar meses do ano e dias  da semanas.</Text>
+            <Text style={{ textAlign: 'center' }}>{produto?.descricao}</Text>
           </Flex>
 
-          <Flex vertical>
+          <Flex vertical style={{ flex: 1 }}>
             <Divisor
               titulo="Medidas (Alt x Comp)"
               tamanhoTitulo={font.body}
             />
-            <Text style={{ textAlign: 'center' }}>Altura: 50,00cm</Text>
-            <Text style={{ textAlign: 'center' }}>Comprimento: 50,00cm</Text>
+            <Text style={{ textAlign: 'center' }}>Altura: {(produto?.altura)?`${produto?.altura}cm`:'Não informada'}</Text>
+            <Text style={{ textAlign: 'center' }}>Comprimento: {(produto?.comprimento)?`${produto?.comprimento}cm`:'Não informado'}</Text>
           </Flex>
 
-          <Flex vertical>
+          <Flex vertical style={{ flex: 1 }}>
             <Divisor
               titulo="Confecção e modelagem"
               tamanhoTitulo={font.body}
             />
-            <Text style={{ textAlign: 'center' }}>A decoração é confeccionada com folhas de papel E.V.A de várias cores,  cola para madeira/isopor e muito carinho! O material garante a firmeza e durabilidade necessária para se manter conservado na sala de aula  durante todo o período letivo.</Text>
+            <Text style={{ textAlign: 'center' }}>{produto?.modelagem}</Text>
           </Flex>
         </Container>
       </Container>
@@ -114,13 +129,16 @@ export const DetalheProduto = () => {
           wrap
           justify="center"
         >
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
+          {
+            produtosPaginados?.get('')?.produtos.map((produtoSug, indice) => (
+              <CardProduto key={indice} produto={produtoSug} />
+            ))
+          }
         </Flex>
 
-        <Button size="large" type="primary">Ver mais</Button>
+        <Button size="large" type="primary" onClick={async () => {
+          navigator('/produtos')
+        }}>Ver mais</Button>
 
       </Container>
     </>

@@ -1,7 +1,7 @@
 import { AppstoreFilled, BellOutlined, HeartFilled, HomeFilled, ShoppingCartOutlined, SmileFilled } from "@ant-design/icons";
 import { Badge, Button, Flex, Image, Tabs, type TabsProps } from "antd";
-import React, { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from '../assets/icone reverso.png';
 import { colors } from "../theme/colors";
 import { Container } from "./Container";
@@ -36,6 +36,16 @@ export const Navbar: React.FC<{
   const [activeKey, setActiveKey] = useState<string>(paginaAtiva);
 
   const navigator = useNavigate()
+  
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/produto/')) {
+      setActiveKey('...')
+    } else {
+      setActiveKey(location.pathname.substring(1, location.pathname.length))
+    }
+  }, [location.pathname])
 
   return (
     <>
