@@ -1,10 +1,21 @@
 import { Container } from "../components/Container";
 
 import { Flex, Pagination } from "antd";
+import { useEffect, useState } from "react";
 import { AreaPesquisaProdutos } from "../components/AreaPesquisaProdutos";
 import { CardProduto } from "../components/CardProduto";
+import { useProdutos } from "../hooks/useProdutos";
 
 export const Produtos = () => {
+  const { produtosPaginados, paginar, totalProdutos, carregarTotalProdutos } = useProdutos()
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    carregarTotalProdutos()
+    paginar()
+    console.info(produtosPaginados?.get('')?.produtos)
+  }, [])
+
   return (
     <>
       <Container
@@ -27,21 +38,46 @@ export const Produtos = () => {
           wrap
           justify="center"
         >
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
+          {produtosPaginados?.get('')?.produtos.map((produto, indice) => (
+            <CardProduto key={indice} produto={produto} />
+          ))
+          }
         </Flex>
 
-        <Pagination defaultCurrent={1} total={10} />
+        <Pagination
+          current={page}
+          defaultCurrent={page}
+          total={totalProdutos}
+          pageSize={8}
+          simple
+          onChange={(pageClicked) => {
+            if (pageClicked > page) {
+              console.log('avançando pagina')
+              console.info(produtosPaginados)
+              setPage(pageClicked)
+              paginar({
+                limit: 8,
+                params: {
+                  navigation: 'next',
+                  cursor: produtosPaginados?.get('')?.nextCursor,
+                  cursorPrev: produtosPaginados?.get('')?.prevCursor
+                }
+              })
+            } else {
+              console.log('voltando pagina')
+              console.info(produtosPaginados)
+              setPage(pageClicked)
+              paginar({
+                limit: 8,
+                params: {
+                  navigation: 'last',
+                  cursor: produtosPaginados?.get('')?.nextCursor,
+                  cursorPrev: produtosPaginados?.get('')?.prevCursor
+                }
+              })
+            }
+          }}
+        />
       </Container>
     </>
   )

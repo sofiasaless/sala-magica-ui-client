@@ -2,11 +2,13 @@ import { Container } from "../components/Container";
 
 import { BulbOutlined, CrownOutlined, HighlightOutlined } from "@ant-design/icons";
 import { Flex } from 'antd';
+import { useEffect } from "react";
 import { AreaPesquisaProdutos } from "../components/AreaPesquisaProdutos";
 import { CardProduto } from "../components/CardProduto";
 import { CardServico, type ServicoType } from "../components/CardServico";
 import { Divisor } from "../components/Divisor";
 import FormularioEncomenda from "../components/FormularioEncomenda";
+import { useProdutos } from "../hooks/useProdutos";
 import { colors } from "../theme/colors";
 
 
@@ -29,6 +31,14 @@ const servicoes_prestados: ServicoType[] = [
 ]
 
 export const Inicio = () => {
+
+  const { produtosPaginados, paginarFiltrado } = useProdutos()
+  
+  useEffect(() => {
+    paginarFiltrado({limite: 4, categoria: "Enfeites de parede", ordem: "dataAnuncio"}, "enfeites")
+    paginarFiltrado({limite: 4, categoria: "Materiais educativos", ordem: "dataAnuncio"}, "educativo")
+  }, [])
+
   return (
     <>
       <Container
@@ -79,10 +89,9 @@ export const Inicio = () => {
         />
 
         <Flex gap={"large"}>
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
+          {produtosPaginados?.get('enfeites')?.produtos.map((produto, indice) => (
+            <CardProduto key={indice} produto={produto} />
+          ))}
         </Flex>
 
         <Divisor 
@@ -96,10 +105,9 @@ export const Inicio = () => {
         />
 
         <Flex gap={"large"}>
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
-          <CardProduto />
+          {produtosPaginados?.get('educativo')?.produtos.map((produto, indice) => (
+            <CardProduto key={indice} produto={produto} />
+          ))}
         </Flex>
       </Container>
 

@@ -2,10 +2,12 @@ import { HeartOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Card } from "antd";
 import { colors } from "../theme/colors";
 import { font } from "../theme/font";
+import type React from "react";
+import type { Produto } from "../types/produto.type";
 
 const { Meta } = Card;
 
-export const CardProduto = () => {
+export const CardProduto: React.FC<{ produto: Produto }> = ( {produto} ) => {
   return (
     <Card
       style={{ width: 230 }}
@@ -13,7 +15,7 @@ export const CardProduto = () => {
         <img
           draggable={false}
           alt="example"
-          src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+          src={(produto.imagemCapa)?produto.imagemCapa:'https://picsum.photos/200/300'}
         />
       }
       actions={[
@@ -28,7 +30,7 @@ export const CardProduto = () => {
             fontSize: font.h5,
             // fontWeight: 600
           }}>
-            Calendário tema azul
+            {produto.titulo}
           </span>
         }
         description={
@@ -36,7 +38,7 @@ export const CardProduto = () => {
             color:colors.primary,
             fontSize: font.h5
           }}>
-            R$ 50,00
+            R$ {produto.preco.toFixed(2)}
           </span>
         }
       />
