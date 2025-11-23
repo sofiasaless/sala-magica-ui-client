@@ -1,6 +1,8 @@
 import type React from "react";
 import type { ReactNode } from "react";
 import { colors } from "../theme/colors";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 type JustifyContent = 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
 type AlignItems = 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
@@ -12,11 +14,13 @@ export const Container: React.FC<{
   alignItems?: AlignItems,
   paddingHorizontal?: number
   paddingVertical?: number,
+  paddingTop?: number,
   backgroundColor?: string,
   flexDirection?: 'column' | 'row',
   gap?: number,
   heigth?: number | string,
-  position?: 'static' | 'relative' | 'absolute' | 'sticky' | 'fixed' | undefined
+  position?: 'static' | 'relative' | 'absolute' | 'sticky' | 'fixed' | undefined,
+  carregando?: boolean
 }> =
   ({
     children,
@@ -25,10 +29,12 @@ export const Container: React.FC<{
     alignItems,
     paddingHorizontal = 15,
     paddingVertical = 5,
+    paddingTop,
     backgroundColor = colors.backgroundMain,
     flexDirection = 'row',
     gap = 0,
-    heigth = 'auto'
+    heigth = 'auto',
+    carregando = false,
   }) => {
 
     return (
@@ -43,10 +49,15 @@ export const Container: React.FC<{
           alignItems: alignItems,
           paddingInline: `${paddingHorizontal}%`,
           paddingBlock: `${paddingVertical}rem`,
+          paddingTop: `${paddingTop}rem`,
           gap: gap,
         }}
       >
-        {children}
+        {(carregando) ?
+          <Spin indicator={<LoadingOutlined spin />} size="large" />
+          :
+          children
+        }
       </div>
     )
   }

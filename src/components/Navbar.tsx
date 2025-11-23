@@ -1,10 +1,12 @@
 import { AppstoreFilled, BellOutlined, HeartFilled, HomeFilled, ShoppingCartOutlined, SmileFilled } from "@ant-design/icons";
-import { Badge, Button, Flex, Image, Tabs, type TabsProps } from "antd";
+import { Badge, Button, Flex, Image, Layout, Tabs, type TabsProps } from "antd";
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from '../assets/icone reverso.png';
 import { colors } from "../theme/colors";
 import { Container } from "./Container";
+
+const { Header: AntHeader } = Layout;
 
 const items: TabsProps['items'] = [
   {
@@ -31,12 +33,24 @@ const items: TabsProps['items'] = [
 
 export const Navbar: React.FC<{
   paginaAtiva?: string
-}> = ( {paginaAtiva = ''} ) => {
+}> = ({ paginaAtiva = '' }) => {
+
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const [activeKey, setActiveKey] = useState<string>(paginaAtiva);
 
   const navigator = useNavigate()
-  
+
   const location = useLocation()
 
   useEffect(() => {
@@ -49,10 +63,25 @@ export const Navbar: React.FC<{
 
   return (
     <>
-      <Container
-        justifyContent="space-between"
-        alignItems="center"
-        paddingVertical={0.5}
+      <AntHeader
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          paddingBlock: '0.5rem',
+          paddingInline: '15%',
+          alignItems: 'center',
+          flexDirection: 'row',
+          zIndex: 1000,
+          backgroundColor: colors.backgroundMain,
+          position: 'fixed',
+          top: 0,
+          width: '100%',
+          height: 'auto',
+          backdropFilter: scrolled ? 'blur(10px)' : 'none',
+          boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+          transition: 'all 0.3s ease',
+        }}
+      // position="fixed"
       >
         <Image
           preview={false}
@@ -89,12 +118,12 @@ export const Navbar: React.FC<{
             />
           </Badge>
         </Flex>
-      </Container>
+      </AntHeader>
 
       <Container
         flexDirection="column"
         paddingHorizontal={0}
-        paddingVertical={0}
+        paddingVertical={6}
         alignItems="center"
         justifyContent="center"
       >

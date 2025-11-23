@@ -54,10 +54,10 @@ export function useProdutos() {
 
   return {
     carregando,
-    produtosPaginados, 
-    paginarFiltrado, 
-    paginar, 
-    carregarTotalProdutos, 
+    produtosPaginados,
+    paginarFiltrado,
+    paginar,
+    carregarTotalProdutos,
     totalProdutos,
     buscarProduto,
     produto

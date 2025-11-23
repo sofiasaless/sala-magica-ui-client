@@ -17,7 +17,7 @@ export const DetalheProduto = () => {
 
   const navigator = useNavigate()
 
-  const { produto, buscarProduto, produtosPaginados, paginar } = useProdutos()
+  const { produto, buscarProduto, produtosPaginados, paginar, carregando } = useProdutos()
 
   useEffect(() => {
     if (id) buscarProduto(id)
@@ -32,6 +32,7 @@ export const DetalheProduto = () => {
   return (
     <>
       <Container
+        carregando={carregando}
         backgroundColor={colors.primaryLighter}
         flexDirection="column"
         paddingVertical={1.5}
