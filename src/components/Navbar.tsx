@@ -1,10 +1,11 @@
 import { AppstoreFilled, BellOutlined, HeartFilled, HomeFilled, ShoppingCartOutlined, SmileFilled } from "@ant-design/icons";
 import { Badge, Button, Flex, Image, Layout, Tabs, type TabsProps } from "antd";
 import React, { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from '../assets/icone reverso.png';
 import { colors } from "../theme/colors";
 import { Container } from "./Container";
+import { useItensCarrinho } from "../contexts/ItensCarrinhoContext";
 
 const { Header: AntHeader } = Layout;
 
@@ -53,6 +54,8 @@ export const Navbar: React.FC<{
 
   const location = useLocation()
 
+  const { itensCarrinho } = useItensCarrinho()
+
   useEffect(() => {
     if (location.pathname.startsWith('/produto/')) {
       setActiveKey('...')
@@ -81,7 +84,6 @@ export const Navbar: React.FC<{
           boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
           transition: 'all 0.3s ease',
         }}
-      // position="fixed"
       >
         <Image
           preview={false}
@@ -104,18 +106,22 @@ export const Navbar: React.FC<{
         <Flex
           gap="middle"
         >
-          <Badge count={2} color="#ff4d4f">
-            <Button
-              type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
-              onClick={() => setActiveKey('carrinho')}
-            />
+          <Badge defaultValue={0} count={(itensCarrinho.length === 0)?1:itensCarrinho.length} color="#ff4d4f">
+            <Link to={'/carrinho'}>
+              <Button
+                type="default" shape="circle" icon={<ShoppingCartOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
+                onClick={() => setActiveKey('carrinho')}
+              />
+            </Link>
           </Badge>
 
           <Badge count={9} color="#ff4d4f">
-            <Button
-              type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
-              onClick={() => setActiveKey('notificacoes')}
-            />
+            <Link to={'/notificacoes'}>
+              <Button
+                type="default" shape="circle" icon={<BellOutlined style={{ color: colors.primary, fontSize: 22 }} />} size={"large"}
+                onClick={() => setActiveKey('notificacoes')}
+              />
+            </Link>
           </Badge>
         </Flex>
       </AntHeader>

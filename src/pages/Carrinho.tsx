@@ -4,16 +4,12 @@ import { SendOutlined } from "@ant-design/icons";
 import { Button, List } from "antd";
 import { Divisor } from "../components/Divisor";
 import { ItemCarrinho } from "../components/ItemCarrinho";
-
-const data = Array.from({ length: 4 }).map(() => ({
-  title: `Calendário`,
-  description:
-    'R$ 50,00',
-  content:
-    'Feito com material EVA, o calendário pode ser fixado na parede e é  excelente para interação com as crianças ao abordar meses do ano e dias da semanas.',
-}));
+import { useItensCarrinho } from "../contexts/ItensCarrinhoContext";
 
 export const Carrinho = () => {
+
+  const { itensCarrinho } = useItensCarrinho()
+
   return (
     <>
       <Container
@@ -28,7 +24,7 @@ export const Carrinho = () => {
         <List
           itemLayout="vertical"
           size="large"
-          dataSource={data}
+          dataSource={itensCarrinho}
           footer={
             <div
               style={{

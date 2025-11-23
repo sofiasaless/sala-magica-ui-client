@@ -3,23 +3,22 @@ import { List, Space } from "antd";
 import React from "react";
 import { colors } from '../theme/colors';
 import { font } from '../theme/font';
+import type { Produto } from '../types/produto.type';
+import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 
-const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-  <Space>
+const IconText = ({ icon, text, onClick }: { icon: React.FC; text: string, onClick?: (e: any) => void }) => (
+  <Space onClick={onClick} style={{ cursor: 'pointer' }}>
     {React.createElement(icon)}
     {text}
   </Space>
 );
 
-interface ItemCarrinhoProps {
-  title: string,
-  description: string,
-  content: string
-}
-
 export const ItemCarrinho: React.FC<{
-  item: ItemCarrinhoProps
+  item: Produto
 }> = ({ item }) => {
+
+  const { removerItem } = useItensCarrinho()
+
   return (
     <List.Item
       style={{
@@ -27,34 +26,39 @@ export const ItemCarrinho: React.FC<{
         minWidth: 300,
         paddingBlock: 25
       }}
-      key={item.title}
+      key={item.titulo}
       actions={[
-        <IconText icon={DeleteOutlined} text="Remover" key="list-vertical-star-o" />,
+        <IconText icon={DeleteOutlined} text="Remover" key="list-vertical-star-o" onClick={() => removerItem(item.id!)} />,
         <IconText icon={HeartOutlined} text="Favoritar" key="list-vertical-like-o" />,
         <IconText icon={WhatsAppOutlined} text="Encomendar" key="list-vertical-message" />,
       ]}
       extra={
         <img
           draggable={false}
-          width={300}
+          width={180}
           alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+          src={item.imagemCapa}
         />
       }
     >
       <List.Item.Meta
         title={
           <span style={{ fontSize: font.h4, fontWeight: 600, color: 'black' }}>
-            {item.title}
+            {item.titulo}
           </span>
         }
         description={
-          <span style={{ fontSize: font.h5, color: colors.primary }}>
-            {item.description}
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: font.h5, color: colors.primary }}>
+              R$ {item.preco.toFixed(2)}
+            </span>
+            {/* <span style={{ fontSize: font.body, color: 'black' }}>
+              Qtd. 2x
+            </span> */}
+          </div>
         }
       />
-      {item.content}
+      {item.descricao}
     </List.Item>
   )
 }
