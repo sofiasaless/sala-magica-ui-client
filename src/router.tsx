@@ -8,6 +8,8 @@ import { DetalheProduto } from "./pages/DetalheProduto";
 import { Carrinho } from "./pages/Carrinho";
 import { Notificacoes } from "./pages/Notificacoes";
 import { ItensPedidoProvider } from "./contexts/ItensCarrinhoContext";
+import Entrar from "./pages/Entrar";
+import Cadastro from "./pages/Cadastro";
 
 export default function Rotas() {
   return (
@@ -23,10 +25,12 @@ export default function Rotas() {
 
             <Route path="/produto/:id" element={<DetalheProduto />} />
 
-            <Route path="/carrinho" element={<Carrinho />}/>
-            <Route path="/notificacoes" element={<Notificacoes />}/>
+            <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="/notificacoes" element={<Notificacoes />} />
 
           </Route>
+          <Route path="/entrar" element={<Entrar />} />
+          <Route path="/cadastro" element={<Cadastro />} />
         </Routes>
       </BrowserRouter>
     </ItensPedidoProvider>

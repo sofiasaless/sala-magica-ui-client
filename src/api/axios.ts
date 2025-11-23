@@ -1,4 +1,5 @@
 import axios from "axios";
+import { auth } from "../client/firebase";
 
 // constante para requisições com o axios
 export const api = axios.create({
@@ -6,8 +7,13 @@ export const api = axios.create({
   timeout: 8000,
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("salamagica_token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(async (config) => {
+  const token = await auth.currentUser?.getIdToken();
+
+  // agora o token do auth firebase vai ser enviado
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   return config;
 });
