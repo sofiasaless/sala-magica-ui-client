@@ -1,6 +1,6 @@
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, Typography } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthService } from '../service/auth.service';
 import { colors } from '../theme/colors';
 
@@ -14,9 +14,11 @@ interface LoginFormValues {
 const Entrar = () => {
   const [form] = Form.useForm<LoginFormValues>();
 
+  const navigator = useNavigate();
+
   const onFinish = async (values: LoginFormValues) => {
-    console.log('Login values:', values);
     await AuthService.logarUsuario(values.email, values.senha);
+    await navigator('/')
   };
 
   return (
