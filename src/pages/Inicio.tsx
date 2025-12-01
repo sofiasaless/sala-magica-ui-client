@@ -58,11 +58,11 @@ export const Inicio = () => {
   }, [])
 
   const { isAutenticado } = useAuthUser();
-  const { carregarProdutosFavoritos } = useProdutosFavoritos();
+  const { produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
 
   useEffect(() => {
     if (isAutenticado) {
-      carregarProdutosFavoritos();
+      if (produtosFavoritos === undefined) carregarProdutosFavoritos();
     }
   }, [isAutenticado])
 

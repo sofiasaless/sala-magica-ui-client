@@ -5,10 +5,19 @@ import { Flex, Pagination, Spin } from "antd";
 import { CardProduto } from "../components/CardProduto";
 import { Divisor } from "../components/Divisor";
 import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
+import { useEffect } from "react";
+import { useAuthUser } from "../hooks/useAuthUser";
 
 export const Favoritos = () => {
   
-  const { carregandoFavoritos, produtosFavoritos } = useProdutosFavoritos();
+  const { carregandoFavoritos, produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
+  const { isAutenticado } = useAuthUser()
+
+  useEffect(() => {
+    if (isAutenticado) {
+      if (produtosFavoritos === undefined) carregarProdutosFavoritos();
+    }
+  }, [])
   
   return (
     <>
