@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Container } from "../components/Container";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { colors } from "../theme/colors";
+import { formatarDataPtBR } from "../util/datas.util";
 
 interface DataType {
   key: string;
@@ -111,9 +112,6 @@ const FormConfiguracoes = () => {
   )
 }
 
-
-
-
 export const Perfil = () => {
 
   const { usuario, isAutenticado, desconectarUsuario } = useAuthUser()
@@ -140,7 +138,7 @@ export const Perfil = () => {
     {
       key: '6',
       label: 'Ativo desde',
-      children: <Badge status="processing" text="20 de setembro de 2025" />,
+      children: <Badge status="processing" text={formatarDataPtBR(usuario?.metadata.creationTime)} />,
       span: 3,
     }
   ];

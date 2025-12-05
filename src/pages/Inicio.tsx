@@ -10,6 +10,8 @@ import { Divisor } from "../components/Divisor";
 import FormularioEncomenda from "../components/FormularioEncomenda";
 import { colors } from "../theme/colors";
 import { useProdutosPaginados } from "../hooks/useProdutosPaginados";
+import { useAuthUser } from "../hooks/useAuthUser";
+import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
 
 
 const servicoes_prestados: ServicoType[] = [
@@ -54,6 +56,15 @@ export const Inicio = () => {
       }
     }, 'educativo')
   }, [])
+
+  const { isAutenticado } = useAuthUser();
+  const { produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
+
+  useEffect(() => {
+    if (isAutenticado) {
+      if (produtosFavoritos === undefined) carregarProdutosFavoritos();
+    }
+  }, [isAutenticado])
 
   return (
     <>

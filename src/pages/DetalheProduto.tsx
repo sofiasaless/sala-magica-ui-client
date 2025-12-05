@@ -2,15 +2,18 @@ import { Button, Flex, Image, notification, Typography } from "antd"
 import { Container } from "../components/Container"
 import { colors } from "../theme/colors"
 import { font } from "../theme/font";
-import { HeartOutlined, ShareAltOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { HeartFilled, HeartOutlined, ShareAltOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { Divisor } from "../components/Divisor";
 import { CardProduto } from "../components/CardProduto";
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useProdutosGeral } from "../hooks/useProdutosGeral";
 import { useProdutosPaginados } from "../hooks/useProdutosPaginados";
 import { useItensCarrinho } from "../contexts/ItensCarrinhoContext";
 import type { NotificationPlacement } from "antd/es/notification/interface";
+import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
+import { useAuthUser } from "../hooks/useAuthUser";
+import { HttpStatusCode } from "axios";
 
 const { Text } = Typography;
 
@@ -37,6 +40,21 @@ export const DetalheProduto = () => {
     });
   };
 
+  const [isFav, setIsFav] = useState<boolean>(false)
+  const { isAutenticado } = useAuthUser()
+  const { curtirOuDescurtirProduto, recarregarProdutosFavoritos, isProdutoFavoritado } = useProdutosFavoritos()
+
+  const handleFavAction = async () => {
+    if (isAutenticado) {
+      const requisicaoResult = await curtirOuDescurtirProduto(produto?.id!);
+      if (requisicaoResult.status === HttpStatusCode.Ok) {
+        await recarregarProdutosFavoritos();
+        setIsFav(!isFav)
+      }
+      return
+    }
+  }
+
   const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 
   useEffect(() => {
@@ -48,6 +66,12 @@ export const DetalheProduto = () => {
       }
     })
   }, [id])
+
+  useEffect(() => {
+    if (!isFav) {
+      setIsFav(isProdutoFavoritado(produto?.id))
+    }
+  }, [isAutenticado, produto])
 
   return (
     <>
@@ -92,7 +116,10 @@ export const DetalheProduto = () => {
 
               <Flex gap={"small"}>
                 <Button type="dashed" size="middle" shape="circle" icon={<ShareAltOutlined style={{ color: colors.info, fontSize: font.h5 }} />} />
-                <Button type="dashed" size="middle" shape="circle" icon={<HeartOutlined style={{ color: colors.error, fontSize: font.h5 }} />} />
+                <Button onClick={handleFavAction} type="dashed" size="middle" shape="circle" icon={
+                  (isFav) ? <HeartFilled style={{ color: colors.error, fontSize: font.h5 }} /> : <HeartOutlined style={{ color: colors.error, fontSize: font.h5 }} />
+                }
+                />
               </Flex>
 
               <Flex gap={"small"}>

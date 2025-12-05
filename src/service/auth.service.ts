@@ -5,8 +5,9 @@ import { authApi } from "../api/modules/auth.api";
 
 export const AuthService = {
   async logarUsuario(email: string, senha: string) {
-    return await signInWithEmailAndPassword(auth, email, senha).then(response => {
-      console.info('logado com sucesso ', response.user)
+    return await signInWithEmailAndPassword(auth, email, senha).then(async (response) => {
+      const token = await auth.currentUser?.getIdTokenResult();
+      localStorage.setItem('jwt', token?.token!)
     })
     .catch(err => {
       console.error('erro ao logar ', err)
