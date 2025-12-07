@@ -10,6 +10,7 @@ import { useAuthUser } from "../hooks/useAuthUser";
 import { useProdutosGeral } from "../hooks/useProdutosGeral";
 import { useProdutosPaginados } from "../hooks/useProdutosPaginados";
 import { colors } from "../theme/colors";
+import { useNavigate } from "react-router-dom";
 const { useBreakpoint } = Grid;
 
 const { Title, Text, Paragraph } = Typography;
@@ -17,6 +18,8 @@ const { Title, Text, Paragraph } = Typography;
 export const Inicio = () => {
 
   const screens = useBreakpoint();
+
+  const navigator = useNavigate();
 
   const { produtosPaginados, paginar } = useProdutosPaginados()
   const { contarTotalProdutos, totalProdutos } = useProdutosGeral()
@@ -162,6 +165,7 @@ export const Inicio = () => {
                 type="primary"
                 size="large"
                 icon={<StarFilled />}
+                onClick={() => navigator('/encomenda')}
                 style={{
                   background: colors.secondary,
                   borderColor: colors.secondary,
