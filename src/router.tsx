@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Inicio } from "./pages/Inicio";
-import { Favoritos } from "./pages/Favoritos";
 import { Perfil } from "./pages/Perfil";
 import { Carrinho } from "./pages/Carrinho";
 import { Notificacoes } from "./pages/Notificacoes";
@@ -10,6 +9,7 @@ import Cadastro from "./pages/Cadastro";
 import { Navbar } from "./components/Navbar";
 import { FormularioEncomenda } from "./pages/Encomenda";
 import { DetalhesProduto } from "./pages/DetalheProduto";
+import { Favoritos } from "./pages/Favoritos";
 
 export default function Rotas() {
   return (

@@ -1,52 +1,95 @@
-import { Container } from "../components/Container";
+import {
+  HeartFilled,
+  ShoppingOutlined
+} from '@ant-design/icons';
+import {
+  Button,
+  Card,
+  Col,
+  Empty,
+  Row,
+  Tag,
+  Typography
+} from 'antd';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CardProduto } from '../components/CardProduto';
+import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
+import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
+import { useAuthUser } from '../hooks/useAuthUser';
+import { colors } from '../theme/colors';
 
-import { LoadingOutlined } from "@ant-design/icons";
-import { Flex, Pagination, Spin } from "antd";
-import { CardProduto } from "../components/CardProduto";
-import { Divisor } from "../components/Divisor";
-import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
-import { useEffect } from "react";
-import { useAuthUser } from "../hooks/useAuthUser";
+const { Title, Text } = Typography;
 
-export const Favoritos = () => {
-  
+export function Favoritos() {
+
+  const navigator = useNavigate()
+
   const { carregandoFavoritos, produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
   const { isAutenticado } = useAuthUser()
+
+  if (!isAutenticado) {
+    return <NaoConectadoFeedback proposito='favoritar os produtos da Sala Mágica!' />
+  }
 
   useEffect(() => {
     if (isAutenticado) {
       if (produtosFavoritos === undefined) carregarProdutosFavoritos();
     }
   }, [])
-  
-  return (
-    <>
-      <Container
-        paddingVertical={3}
-        flexDirection="column"
-        gap={30}
-        alignItems="center"
-      >
-        <Divisor
-          titulo="Seus favoritos"
-        />
-        <Flex
-          gap={"large"}
-          wrap
-          justify="center"
-        >
-          {
-            (carregandoFavoritos)?
-            <Spin indicator={<LoadingOutlined spin />} size="large" />
-            :
-            produtosFavoritos?.map((prod) => (
-              <CardProduto produto={prod} fav/>
-            ))
-          }
-        </Flex>
 
-        <Pagination defaultCurrent={1} total={10} />
-      </Container>
-    </>
-  )
-}
+  return (
+    (produtosFavoritos?.length === 0 && !carregandoFavoritos) ?
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        <Card style={{ borderRadius: 16, textAlign: 'center', padding: 48 }}>
+          <Empty
+            image={<div style={{ fontSize: 80, marginBottom: 16 }}><HeartFilled /></div>}
+            description={
+              <div>
+                <Title level={4} style={{ color: '#262626' }}>
+                  Nenhum favorito ainda
+                </Title>
+                <Text type="secondary">
+                  Explore nosso catálogo e salve seus produtos preferidos!
+                </Text>
+              </div>
+            }
+          >
+            <Button
+              type="primary"
+              size="large"
+              icon={<ShoppingOutlined />}
+              onClick={() => navigator('/')}
+              style={{
+                background: colors.primary,
+                borderColor: colors.primary,
+                borderRadius: 8,
+                height: 48,
+                paddingInline: 32
+              }}
+            >
+              Ver Catálogo
+            </Button>
+          </Empty>
+        </Card>
+      </div>
+      :
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <Title level={2} style={{ marginBottom: 24 }}>
+          <HeartFilled style={{ marginRight: 12, color: '#FF4D4F' }} />
+          Meus Favoritos
+          <Tag color="magenta" style={{ marginLeft: 12, fontSize: 14 }}>
+            {produtosFavoritos?.length} {produtosFavoritos?.length === 1 ? 'item' : 'itens'}
+          </Tag>
+        </Title>
+
+        <Row gutter={[16, 16]}>
+          {produtosFavoritos?.map(product => (
+            <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
+              <CardProduto produto={product} />
+            </Col>
+          ))}
+        </Row>
+      </div>
+  );
+};
