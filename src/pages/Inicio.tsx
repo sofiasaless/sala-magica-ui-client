@@ -1,7 +1,7 @@
 import { Container } from "../components/Container";
 
-import { BulbOutlined, CrownOutlined, HighlightOutlined } from "@ant-design/icons";
-import { Flex } from 'antd';
+import { BulbOutlined, CrownOutlined, EditTwoTone, HeartTwoTone, HighlightOutlined, ShoppingTwoTone, SmileTwoTone } from "@ant-design/icons";
+import { Card, Col, Flex, Row, Typography } from 'antd';
 import { useEffect } from "react";
 import { AreaPesquisaProdutos } from "../components/AreaPesquisaProdutos";
 import { CardProduto } from "../components/CardProduto";
@@ -12,30 +12,14 @@ import { colors } from "../theme/colors";
 import { useProdutosPaginados } from "../hooks/useProdutosPaginados";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
+import { Carrossel } from "../components/Carrossel";
 
-
-const servicoes_prestados: ServicoType[] = [
-  {
-    icone: <CrownOutlined color={colors.secondary} />,
-    titulo: "Enfeites Exclusivos",
-    descricao: "Que tal um enfeite único feito especialmente para você? Preencha o formulário e criaremos algo exclusivo e encantador."
-  },
-  {
-    icone: <BulbOutlined color={colors.secondary} />,
-    titulo: "Decorações Personalizadas",
-    descricao: "Produzimos decorações sob medida, com o seu toque especial em cada detalhe, do jeitinho que você sonhar para sua sala de aula!"
-  },
-  {
-    icone: <HighlightOutlined color={colors.secondary} />,
-    titulo: "Personalização com Carinho",
-    descricao: "Criamos cada peça com materiais como EVA, papel crepom e TNT, dando vida a decorações únicas e cheias de amor. Você imagina, nós criamos!"
-  }
-]
+const { Title, Text, Paragraph } = Typography;
 
 export const Inicio = () => {
 
   const { produtosPaginados, paginar } = useProdutosPaginados()
-  
+
   useEffect(() => {
     paginar({
       limit: 4,
@@ -68,7 +52,37 @@ export const Inicio = () => {
 
   return (
     <>
-      <Container
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <Carrossel />
+
+        <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+          {[
+            { icon: <EditTwoTone twoToneColor={colors.secondary} />, label: 'Feito à Mão', value: '100%' },
+            { icon: <ShoppingTwoTone twoToneColor={colors.secondary} />, label: 'Produtos', value: `10+` },
+            { icon: <HeartTwoTone twoToneColor={colors.secondary} />, label: 'Avaliação', value: '4.9' },
+            { icon: <SmileTwoTone twoToneColor={colors.secondary} />, label: 'Clientes Felizes', value: '50+' }
+          ].map((stat, index) => (
+            <Col xs={12} sm={6} key={index}>
+              <Card
+                style={{
+                  textAlign: 'center',
+                  borderRadius: 12,
+                  border: '1px solid #E6FFFB',
+                  background: '#FAFAFA'
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                <div style={{ fontSize: 42, marginBottom: 8 }}>{stat.icon}</div>
+                <Text strong style={{ fontSize: 24, color: colors.primary, display: 'block' }}>
+                  {stat.value}
+                </Text>
+                <Text type="secondary">{stat.label}</Text>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+      {/* <Container
         justifyContent="center"
         paddingVertical={3}
         flexDirection="column"
@@ -154,7 +168,7 @@ export const Inicio = () => {
           width={50}
         />
         <FormularioEncomenda />
-      </Container>
+      </Container> */}
     </>
   )
 }
