@@ -4,6 +4,7 @@ import {
   FormOutlined,
   HeartOutlined,
   HomeOutlined,
+  InboxOutlined,
   MenuOutlined,
   SearchOutlined,
   ShoppingCartOutlined,
@@ -29,6 +30,8 @@ import logo from '../assets/logo.png';
 import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { categories } from '../data/mockData';
 import { SiteFooter } from './SiteFooter';
+import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
+import { useAuthUser } from '../hooks/useAuthUser';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -37,6 +40,10 @@ export const Navbar = () => {
   const [currentPage, setCurrentPage] = useState('')
   const [searchValue, setSearchValue] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { produtosFavoritos } = useProdutosFavoritos();
+
+  const { desconectarUsuario } = useAuthUser()
 
   const { itensCarrinho } = useItensCarrinho()
 
@@ -59,7 +66,7 @@ export const Navbar = () => {
         { key: 'perfil', icon: <UserOutlined />, label: 'Meu Perfil', onClick: () => navigate('perfil') },
         { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas' },
         { type: 'divider' as const },
-        { key: 'logout', label: 'Sair', danger: true }
+        { key: 'logout', label: 'Sair', danger: true, onClick: async () => await  desconectarUsuario()}
       ]}
     />
   );
@@ -67,8 +74,8 @@ export const Navbar = () => {
   const navItems = [
     { key: 'home', icon: <HomeOutlined />, label: 'Início' },
     { key: 'custom', icon: <StarOutlined />, label: 'Encomenda' },
-    { key: 'favorites', icon: <HeartOutlined />, label: `Favoritos (${2})` },
-    { key: 'cart', icon: <ShoppingCartOutlined />, label: `Carrinho (${1})` },
+    { key: 'favorites', icon: <HeartOutlined />, label: `Favoritos (${produtosFavoritos?.length})` },
+    { key: 'cart', icon: <ShoppingCartOutlined />, label: `Carrinho (${itensCarrinho.length})` },
     { key: 'perfil', icon: <UserOutlined />, label: 'Perfil' },
   ];
 
@@ -151,6 +158,15 @@ export const Navbar = () => {
                 }}
               />
             </AutoComplete>
+            <Button
+              type="text"
+              icon={<InboxOutlined />}
+              style={{ color: 'white', height: 42 }}
+              onClick={() => navigate('/encomenda')}
+            >
+              Encomendar
+            </Button>
+
             <Dropdown menu={{ items: categoryMenu.props.items }} placement="bottomRight">
               <Button
                 type="text"
@@ -175,7 +191,7 @@ export const Navbar = () => {
             <Button
               type="text"
               icon={
-                <Badge count={1} size="small" offset={[-2, 2]} style={{ background: '#FAAD14' }}>
+                <Badge count={produtosFavoritos?.length} size="small" offset={[-2, 2]} style={{ background: '#FAAD14' }}>
                   <HeartOutlined style={{ fontSize: 20, color: 'white' }} />
                 </Badge>
               }
@@ -186,7 +202,7 @@ export const Navbar = () => {
             <Button
               type="text"
               icon={
-                <Badge count={(itensCarrinho.length === 0) ? 1 : itensCarrinho.length} size="small" offset={[-2, 2]}>
+                <Badge count={itensCarrinho.length} size="small" offset={[-2, 2]}>
                   <ShoppingCartOutlined style={{ fontSize: 20, color: 'white' }} />
                 </Badge>
               }

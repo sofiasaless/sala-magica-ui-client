@@ -10,6 +10,7 @@ import { Navbar } from "./components/Navbar";
 import { FormularioEncomenda } from "./pages/Encomenda";
 import { DetalhesProduto } from "./pages/DetalheProduto";
 import { Favoritos } from "./pages/Favoritos";
+import { Usuario } from "./pages/Usuario";
 
 export default function Rotas() {
   return (
@@ -20,7 +21,7 @@ export default function Rotas() {
 
             <Route path="/" element={<Inicio />} />
             <Route path="/favoritos" element={<Favoritos />} />
-            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/perfil" element={<Usuario />} />
 
             <Route path="/produto/:id" element={<DetalhesProduto />} />
             <Route path="/encomenda" element={<FormularioEncomenda />}></Route>
