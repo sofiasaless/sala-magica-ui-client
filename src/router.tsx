@@ -1,16 +1,15 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Inicio } from "./pages/Inicio";
-import { Perfil } from "./pages/Perfil";
-import { Carrinho } from "./pages/Carrinho";
-import { Notificacoes } from "./pages/Notificacoes";
-import { ItensPedidoProvider } from "./contexts/ItensCarrinhoContext";
-import Entrar from "./pages/Entrar";
-import Cadastro from "./pages/Cadastro";
 import { Navbar } from "./components/Navbar";
-import { FormularioEncomenda } from "./pages/Encomenda";
+import { ItensPedidoProvider } from "./contexts/ItensCarrinhoContext";
+import Cadastro from "./pages/Cadastro";
 import { DetalhesProduto } from "./pages/DetalheProduto";
+import { FormularioEncomenda } from "./pages/Encomenda";
+import Entrar from "./pages/Entrar";
 import { Favoritos } from "./pages/Favoritos";
+import { Inicio } from "./pages/Inicio";
+import { Notificacoes } from "./pages/Notificacoes";
 import { Usuario } from "./pages/Usuario";
+import { Carrinho } from "./pages/Carrinho";
 
 export default function Rotas() {
   return (

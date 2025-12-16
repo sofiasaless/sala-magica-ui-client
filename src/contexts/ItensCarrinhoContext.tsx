@@ -6,6 +6,7 @@ interface ItensCarrinhoContextType {
   adicionarItem: (item: Produto) => void,
   removerItem: (item_id: string) => void,
   isVazio: () => boolean,
+  limparItens: () => void
 }
 
 const ItensCarrinhoContext = createContext<ItensCarrinhoContextType | undefined>(undefined);
@@ -28,9 +29,13 @@ export const ItensPedidoProvider = ({ children }: { children: ReactNode }) => {
   const isVazio = () => {
     return itensCarrinho.length === 0
   }
+
+  const limparItens = () => {
+    setItensCarrinho([]);
+  }
   
   return (
-    <ItensCarrinhoContext.Provider value={{itensCarrinho, adicionarItem, removerItem, isVazio}}>
+    <ItensCarrinhoContext.Provider value={{itensCarrinho, adicionarItem, removerItem, isVazio, limparItens}}>
       {children}
     </ItensCarrinhoContext.Provider>
   )
