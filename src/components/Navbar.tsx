@@ -26,10 +26,11 @@ import {
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useAuth } from '../contexts/AuthContext';
 import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
+import { useDicionario } from '../hooks/useDicionario';
 import { SiteFooter } from './SiteFooter';
-import { useAuth } from '../contexts/AuthContext';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -64,11 +65,13 @@ export const Navbar = () => {
         { key: 'perfil', icon: <UserOutlined />, label: 'Meu Perfil', onClick: () => navigate('perfil') },
         { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas' },
         { type: 'divider' as const },
-        { key: 'logout', label: 'Sair', danger: true, onClick: async () => {
-          await desconectarUsuario();
-          limparConext()
-          window.location.reload()
-        }}
+        {
+          key: 'logout', label: 'Sair', danger: true, onClick: async () => {
+            await desconectarUsuario();
+            limparConext()
+            window.location.reload()
+          }
+        }
       ]}
     />
   );
@@ -80,6 +83,29 @@ export const Navbar = () => {
     { key: 'carrinho', icon: <ShoppingCartOutlined />, label: `Carrinho (${itensCarrinho.length})`, onclick: () => setCurrentPage('carrinho') },
     { key: 'perfil', icon: <UserOutlined />, label: 'Perfil', onclick: () => setCurrentPage('perfil') },
   ];
+
+  const { dicionario } = useDicionario()
+  const [options, setOptions] = useState<any[]>([]);
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+
+    if (!value) {
+      setOptions(dicionario?.dictionary_items!);
+      return;
+    }
+
+    const filtered = dicionario?.dictionary_items
+      ?.filter(item =>
+        item.label.toLowerCase().includes(value.toLowerCase())
+      )
+      .map(item => ({
+        label: item.label,
+        value: item.productId
+      }));
+
+    setOptions(filtered || []);
+  };
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#FAFAFA' }}>
@@ -141,25 +167,26 @@ export const Navbar = () => {
           <Space size={10} align='center'>
             <AutoComplete
               value={searchValue}
-              onSelect={(value) => {
-                setSearchValue(value);
-                navigate('');
+              options={options}
+              onSearch={handleSearch}
+              onSelect={(value, option) => {
+                setSearchValue(option.label);
+                navigate(`/produto/${value}`);
               }}
               style={{ width: '100%' }}
             >
               <Input
                 prefix={<SearchOutlined style={{ color: '#08979C' }} />}
                 placeholder="Buscar produtos..."
-                size='large'
-                width={800}
+                size="large"
                 style={{
                   borderRadius: 24,
                   border: 'none',
-                  height: 'auto',
                   fontSize: 14
                 }}
               />
             </AutoComplete>
+
             <Button
               type="text"
               icon={<InboxOutlined />}
@@ -243,6 +270,12 @@ export const Navbar = () => {
         >
           <AutoComplete
             value={searchValue}
+            options={options}
+            onSearch={handleSearch}
+            onSelect={(value, option) => {
+              setSearchValue(option.label);
+              navigate(`/produto/${value}`);
+            }}
             style={{ width: '100%' }}
           >
             <Input
