@@ -3,9 +3,11 @@ import {
   BulbOutlined,
   CrownTwoTone,
   FireTwoTone,
+  LoadingOutlined,
   MessageTwoTone,
   PictureOutlined,
-  RocketOutlined
+  RocketOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons';
 import {
   Alert,
@@ -20,6 +22,7 @@ import {
   Row,
   Select,
   Space,
+  Tooltip,
   Typography,
   Upload
 } from 'antd';
@@ -32,6 +35,7 @@ import { colors } from '../theme/colors';
 import type { EncomendaRequestBody } from '../types/encomenda.type';
 import { EncomendaService } from '../service/encomenda.service';
 import { useAuth } from '../contexts/AuthContext';
+import { AiHelper } from '../service/ai-helper.service';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -106,6 +110,47 @@ export function FormularioEncomenda() {
   useEffect(() => {
     if (!isAutenticado) setComponentDisabled(true)
   }, [isAutenticado])
+
+  const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
+
+  const getDescriptionWordCount = (): number => {
+    const description = form.getFieldValue('descricao') || '';
+    return description.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+  };
+
+  const canUseAI = (): boolean => {
+    const categoria = form.getFieldValue('categoria_reference');
+    return !!categoria && getDescriptionWordCount() >= 10;
+  };
+
+  const notificacao = useNotificacao()
+
+  const handleAISuggestion = async () => {
+    setIsGeneratingSuggestion(true)
+    const resultado = await AiHelper.sugerirDescricaoEncomenda({
+      categoria: encontrarNomePorId(form.getFieldValue('categoria_reference'))!,
+      descricaoInicial: form.getFieldValue('descricao')
+    })
+
+    if (resultado.ok) {
+      notificacao({
+        message: resultado.message,
+        type: 'success',
+        placement: 'bottom'
+      })
+      form.setFieldValue('descricao', resultado.datas?.sugestao);
+      setIsGeneratingSuggestion(false)
+      return
+    }
+
+    notificacao({
+      message: resultado.message,
+      type: 'error',
+      placement: 'bottom'
+    })
+    setIsGeneratingSuggestion(false)
+  }
+
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -196,6 +241,55 @@ export function FormularioEncomenda() {
                   style={{ borderRadius: 8 }}
                 />
               </Form.Item>
+              <Card
+                size="small"
+                style={{
+                  background: 'linear-gradient(135deg, #F0F5FF 0%, #E6FFFB 100%)',
+                  border: `1px dashed ${colors.primary}`,
+                  borderRadius: 8,
+                  marginBlock: 20
+                }}
+                bodyStyle={{ padding: '12px 16px' }}
+              >
+                <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                  <Space>
+                    <ThunderboltOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                    <Text strong style={{ color: '#262626', fontSize: 16 }}>
+                      Melhorar descrição com IA
+                    </Text>
+                  </Space>
+                  <Text type="secondary" style={{ fontSize: 14, display: 'block' }}>
+                    A IA pode melhorar sua descrição, adicionando detalhes e formatação profissional.
+                    Para usar, selecione uma categoria e escreva pelo menos 10 palavras.
+                  </Text>
+                  <Tooltip
+                    title={
+                      !form.getFieldValue('categoria_reference')
+                        ? 'Selecione uma categoria primeiro'
+                        : getDescriptionWordCount() < 5
+                          ? `Escreva mais ${5 - getDescriptionWordCount()} palavra(s)`
+                          : 'Clique para aprimorar sua descrição'
+                    }
+                  >
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={isGeneratingSuggestion ? <LoadingOutlined /> : <ThunderboltOutlined />}
+                      onClick={handleAISuggestion}
+                      disabled={!canUseAI() || isGeneratingSuggestion}
+                      loading={isGeneratingSuggestion}
+                      style={{
+                        background: canUseAI() ? 'linear-gradient(135deg, #FAAD14 0%, #FFC53D 100%)' : undefined,
+                        borderColor: canUseAI() ? '#FAAD14' : undefined,
+                        borderRadius: 6,
+                        fontWeight: 500
+                      }}
+                    >
+                      {isGeneratingSuggestion ? 'Gerando...' : 'Sugerir com IA'}
+                    </Button>
+                  </Tooltip>
+                </Space>
+              </Card>
 
               <Row gutter={16}>
                 <Col xs={12}>

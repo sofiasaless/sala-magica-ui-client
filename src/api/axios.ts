@@ -4,7 +4,7 @@ import { auth } from "../client/firebase";
 // constante para requisições com o axios
 export const api = axios.create({
   baseURL: 'http://localhost:3001/api',
-  timeout: 8000,
+  timeout: 100000,
 });
 
 api.interceptors.request.use(async (config) => {
