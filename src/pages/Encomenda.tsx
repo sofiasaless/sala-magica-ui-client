@@ -3,9 +3,11 @@ import {
   BulbOutlined,
   CrownTwoTone,
   FireTwoTone,
+  LoadingOutlined,
   MessageTwoTone,
   PictureOutlined,
-  RocketOutlined
+  RocketOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons';
 import {
   Alert,
@@ -20,18 +22,20 @@ import {
   Row,
   Select,
   Space,
+  Tooltip,
   Typography,
   Upload
 } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useEffect, useState } from 'react';
-import { categories } from '../data/mockData';
-import { useAuthUser } from '../hooks/useAuthUser';
+import { useCategoriasProduto } from '../contexts/CategoriasProdutoContext';
 import { useNotificacao } from '../providers/NotificacaoProvider';
 import { CloudinaryService } from '../service/cloudnary.service';
-import { EncomendaService } from '../service/encomenda.service';
 import { colors } from '../theme/colors';
-import type { Encomenda } from '../types/encomenda.type';
+import type { EncomendaRequestBody } from '../types/encomenda.type';
+import { EncomendaService } from '../service/encomenda.service';
+import { useAuth } from '../contexts/AuthContext';
+import { AiHelper } from '../service/ai-helper.service';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -40,51 +44,56 @@ const { useBreakpoint } = Grid;
 export function FormularioEncomenda() {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
 
-  const { isAutenticado } = useAuthUser()
-
-  const [form] = Form.useForm<Encomenda>();
+  const [form] = Form.useForm<EncomendaRequestBody>();
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [fotos, setFotos] = useState<File[]>([])
 
-  const [previewData, setPreviewData] = useState<Partial<Encomenda> | null>(null);
+  const [previewData, setPreviewData] = useState<Partial<EncomendaRequestBody> | null>(null);
 
   const screens = useBreakpoint();
 
   const floatNotificacao = useNotificacao();
 
-  const handleEnviar = async (valores: Encomenda) => {
-    try {
-      const urlsDasImagens = await Promise.all(
-        fotos.map((foto) => CloudinaryService.enviarImagem(foto))
-      )
+  const { usuario, isAutenticado } = useAuth()
 
-      const encomendaFinal: Encomenda = {
-        ...valores,
-        imagemReferencia: urlsDasImagens
-      }
+  const handleEnviar = async (valores: EncomendaRequestBody) => {
+    const urlsDasImagens = await Promise.all(
+      fotos.map((foto) => CloudinaryService.enviarImagem(foto))
+    )
 
-      const resultado = await EncomendaService.enviarEncomenda(encomendaFinal);
-
-      floatNotificacao({
-        message: resultado.titulo,
-        description: resultado.mensagem,
-        placement: 'bottom'
-      })
-
-      form.resetFields();
-
-    } catch (error) {
-      floatNotificacao({
-        message: 'Erro ao enviar a encomenda',
-        description: 'Tente novamente mais tarde'
-      })
+    const encomendaFinal: EncomendaRequestBody = {
+      ...valores,
+      solicitante: usuario?.uid || '',
+      referencias: valores.referencias || '',
+      imagemReferencia: urlsDasImagens
     }
+
+    const resultado = await EncomendaService.enviarEncomenda(encomendaFinal);
+
+    if (!resultado.ok) {
+      floatNotificacao({
+        type: 'error',
+        message: 'Erro ao enviar encomenda',
+        description: resultado.message
+      })
+      return
+    }
+
+    floatNotificacao({
+      type: 'success',
+      message: resultado.message,
+      description: 'Em breve entraremos em contato!',
+      placement: 'bottom'
+    })
+
+    form.resetFields();
+
   }
 
   const handleFormChange = () => {
     const values = form.getFieldsValue();
-    if (values.descricao || values.categoria || values.altura || values.comprimento) {
+    if (values.descricao || values.categoria_reference || values.altura || values.comprimento || values.referencias) {
       setPreviewData(values);
     }
   };
@@ -96,9 +105,52 @@ export function FormularioEncomenda() {
     { icon: <FireTwoTone twoToneColor={colors.primary} />, title: 'Qualidade Artesanal', description: 'Feito à mão com carinho' }
   ];
 
+  const { categoriasProdutos, encontrarNomePorId } = useCategoriasProduto()
+
   useEffect(() => {
     if (!isAutenticado) setComponentDisabled(true)
   }, [isAutenticado])
+
+  const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
+
+  const getDescriptionWordCount = (): number => {
+    const description = form.getFieldValue('descricao') || '';
+    return description.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+  };
+
+  const canUseAI = (): boolean => {
+    const categoria = form.getFieldValue('categoria_reference');
+    return !!categoria && getDescriptionWordCount() >= 10;
+  };
+
+  const notificacao = useNotificacao()
+
+  const handleAISuggestion = async () => {
+    setIsGeneratingSuggestion(true)
+    const resultado = await AiHelper.sugerirDescricaoEncomenda({
+      categoria: encontrarNomePorId(form.getFieldValue('categoria_reference'))!,
+      descricaoInicial: form.getFieldValue('descricao')
+    })
+
+    if (resultado.ok) {
+      notificacao({
+        message: resultado.message,
+        type: 'success',
+        placement: 'bottom'
+      })
+      form.setFieldValue('descricao', resultado.datas?.sugestao);
+      setIsGeneratingSuggestion(false)
+      return
+    }
+
+    notificacao({
+      message: resultado.message,
+      type: 'error',
+      placement: 'bottom'
+    })
+    setIsGeneratingSuggestion(false)
+  }
+
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -162,16 +214,16 @@ export function FormularioEncomenda() {
               onFinish={handleEnviar}
             >
               <Form.Item
-                name="categoria"
+                name="categoria_reference"
                 label="Categoria do Produto"
                 rules={[{ required: true, message: 'Selecione uma categoria' }]}
               >
                 <Select
                   placeholder="Selecione a categoria"
                   size="large"
-                  options={categories.filter(c => c !== 'Todos').map(cat => ({
-                    label: cat,
-                    value: cat
+                  options={categoriasProdutos?.map(cat => ({
+                    label: cat.nome,
+                    value: cat.id
                   }))}
                 />
               </Form.Item>
@@ -189,6 +241,55 @@ export function FormularioEncomenda() {
                   style={{ borderRadius: 8 }}
                 />
               </Form.Item>
+              <Card
+                size="small"
+                style={{
+                  background: 'linear-gradient(135deg, #F0F5FF 0%, #E6FFFB 100%)',
+                  border: `1px dashed ${colors.primary}`,
+                  borderRadius: 8,
+                  marginBlock: 20
+                }}
+                bodyStyle={{ padding: '12px 16px' }}
+              >
+                <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                  <Space>
+                    <ThunderboltOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                    <Text strong style={{ color: '#262626', fontSize: 16 }}>
+                      Melhorar descrição com IA
+                    </Text>
+                  </Space>
+                  <Text type="secondary" style={{ fontSize: 14, display: 'block' }}>
+                    A IA pode melhorar sua descrição, adicionando detalhes e formatação profissional.
+                    Para usar, selecione uma categoria e escreva pelo menos 10 palavras.
+                  </Text>
+                  <Tooltip
+                    title={
+                      !form.getFieldValue('categoria_reference')
+                        ? 'Selecione uma categoria primeiro'
+                        : getDescriptionWordCount() < 5
+                          ? `Escreva mais ${5 - getDescriptionWordCount()} palavra(s)`
+                          : 'Clique para aprimorar sua descrição'
+                    }
+                  >
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={isGeneratingSuggestion ? <LoadingOutlined /> : <ThunderboltOutlined />}
+                      onClick={handleAISuggestion}
+                      disabled={!canUseAI() || isGeneratingSuggestion}
+                      loading={isGeneratingSuggestion}
+                      style={{
+                        background: canUseAI() ? 'linear-gradient(135deg, #FAAD14 0%, #FFC53D 100%)' : undefined,
+                        borderColor: canUseAI() ? '#FAAD14' : undefined,
+                        borderRadius: 6,
+                        fontWeight: 500
+                      }}
+                    >
+                      {isGeneratingSuggestion ? 'Gerando...' : 'Sugerir com IA'}
+                    </Button>
+                  </Tooltip>
+                </Space>
+              </Card>
 
               <Row gutter={16}>
                 <Col xs={12}>
@@ -338,7 +439,7 @@ export function FormularioEncomenda() {
                     <div>
                       <Text type="secondary">Categoria:</Text>
                       <br />
-                      <Text strong style={{ color: colors.primary }}>{previewData.categoria}</Text>
+                      <Text strong style={{ color: colors.primary }}>{encontrarNomePorId(previewData.categoria_reference)}</Text>
                     </div>
 
                     <Divider style={{ margin: '8px 0' }} />

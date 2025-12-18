@@ -11,13 +11,12 @@ export const ProdutoService = {
     return data
   },
 
-  async contarProdutos() {
-    const { data } = await produtosApi.contarProdutos()
+  async contarProdutos(categoria?: string) {
+    const { data } = await produtosApi.contarProdutos(categoria)
     return data    
   },
 
   async encontrarProdutoPorId(id: string) {
-    const { data } = await produtosApi.encontrarPorId(id);
-    return data
+    return await produtosApi.encontrarPorId(id);
   }
 }

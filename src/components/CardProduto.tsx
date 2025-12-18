@@ -4,10 +4,13 @@ import { HttpStatusCode } from "axios";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useItensCarrinho } from "../contexts/ItensCarrinhoContext";
 import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
-import { useAuthUser } from "../hooks/useAuthUser";
-import type { Produto } from "../types/produto.type";
+import { useNotificacao } from "../providers/NotificacaoProvider";
 import { colors } from "../theme/colors";
+import type { Produto } from "../types/produto.type";
+import { produtoToItemCarrinho } from "../util/carrinho.util";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -18,7 +21,7 @@ export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ pr
    const screens = useBreakpoint();
 
   const [isFav, setIsFav] = useState<boolean>(fav || false)
-  const { isAutenticado } = useAuthUser()
+  const { isAutenticado } = useAuth()
   const { curtirOuDescurtirProduto, recarregarProdutosFavoritos, isProdutoFavoritado, produtosFavoritos } = useProdutosFavoritos()
 
   const handleFavAction = async () => {
@@ -31,6 +34,10 @@ export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ pr
       return
     }
   }
+
+  const { adicionarItem } = useItensCarrinho()
+
+  const notificacao = useNotificacao()
 
   useEffect(() => {
     if (isAutenticado) {
@@ -160,9 +167,25 @@ export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ pr
         <Button
           type="primary"
           icon={<ShoppingCartOutlined />}
-          onClick={(e) => {
+          onClick={async (e) => {
             e.stopPropagation();
 
+            const result = await adicionarItem(produtoToItemCarrinho(produto!, 1))
+            
+            if (result.ok) {
+              notificacao({
+                message: `"${produto?.titulo}" adicionado ao carrinho!`,
+                type: 'success',
+                placement: 'bottom'
+              })
+            } else {
+              notificacao({
+                message: `Erro ao adicionar produto`,
+                type: 'error',
+                description: result.message,
+                placement: 'bottom'
+              })
+            }
           }}
           // disabled={!produto?.ativo}
           style={{

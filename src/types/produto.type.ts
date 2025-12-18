@@ -19,3 +19,16 @@ export type PageProductResponse = {
   nextCursor: string,
   prevCursor: string
 }
+
+export type ItemCarrinho = Produto & {
+  id_item?: string,
+  quantidade: number
+}
+
+export type ItemCarrinhoResponseBody = {
+  id: string,
+  produto_ref: string,
+  usuario_ref: string,
+  quantidade: number,
+  data_adicao: string,
+}

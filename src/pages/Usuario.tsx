@@ -35,26 +35,15 @@ import { CardEncomenda } from '../components/CardEncomenda';
 import { ItemNotificacao } from '../components/ItemNotificacao';
 import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
-import { useAuthUser } from '../hooks/useAuthUser';
 import { colors } from '../theme/colors';
-import type { EncomendaResponseBody } from '../types/encomenda.type';
 import { formatarDataPtBR } from '../util/datas.util';
+import type { EncomendaResponseBody } from '../types/encomenda.type';
+import { EncomendaService } from '../service/encomenda.service';
+import { useNotificacao } from '../providers/NotificacaoProvider';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
-
-const mockEncomenda: EncomendaResponseBody[] = [
-  {
-    id: '1',
-    descricao: 'Painel de aniversariantes do mês com tema safari',
-    categoria: 'Painéis',
-    altura: 100,
-    comprimento: 150,
-    pendente: true,
-    data_envio: '2024-11-20',
-    solicitante: 'maria'
-  }
-]
 
 const mockNotificacoes = [
   {
@@ -77,7 +66,7 @@ export function Usuario() {
   const [form] = Form.useForm();
   const screens = useBreakpoint();
 
-  const { usuario, isAutenticado } = useAuthUser()
+  const { usuario, isAutenticado } = useAuth()
 
   if (!isAutenticado) {
     return <NaoConectadoFeedback proposito='personalizar seu perfil na Sala Mágica!' />
@@ -93,8 +82,27 @@ export function Usuario() {
 
   const [usuarioParaAlterar, setUsuarioParaAlterar] = useState(usuario)
 
+  const [encomendas, setEncomendas] = useState<EncomendaResponseBody[] | undefined>()
+  const floatNotificacao = useNotificacao();
+
+  const handleListarEncomendas = async () => {
+    const resultado = await EncomendaService.encontrarPorUsuario()
+
+    if (resultado.ok) {
+      setEncomendas(resultado.datas)
+      return
+    }
+
+    floatNotificacao({
+      message: 'Não foi possível recuperar suas encomendas',
+      description: resultado.message,
+      type: 'error'
+    })
+  }
+
   useEffect(() => {
     setUsuarioParaAlterar(usuario)
+    handleListarEncomendas();
   }, [usuario])
 
   useEffect(() => {
@@ -106,6 +114,8 @@ export function Usuario() {
       });
     }
   }, [usuarioParaAlterar, form]);
+
+
 
   const tabItems = [
     {
@@ -176,10 +186,10 @@ export function Usuario() {
           Encomendas
         </span>
       ),
-      children: mockEncomenda.length > 0 ? (
+      children: encomendas?.length || 0 > 0 ? (
         <Card style={{ borderRadius: 12 }}>
           <Timeline
-            items={mockEncomenda.map(encomenda => ({
+            items={encomendas?.map(encomenda => ({
               color: 'green',
               dot: <RocketOutlined />,
               children: (

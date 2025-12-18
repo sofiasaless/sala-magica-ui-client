@@ -2,14 +2,14 @@ import type { PageProductResponse, Produto } from "../../types/produto.type";
 import { api } from "../axios";
 
 export interface PaginacaoProps {
-  limit: number, 
+  limit?: number, 
   params: {
     navigation: 'next' | 'last' | 'first',
     cursor?: string,
     cursorPrev?: string,
   }, 
   filtro?: {
-    categoria: string,
+    categoria?: string,
     ordem?: string
   }
 }
@@ -33,7 +33,7 @@ export const produtosApi = {
 
   paginarFiltrado: (limit: number, categoria: string, ordem: string) => api.get<PageProductResponse>(`/products/page?limit=${limit}&categoria=${categoria}&ordem=${ordem}`),
 
-  contarProdutos: () => api.get<{total: number}>(`/products/count`),
+  contarProdutos: (categoria?: string) => api.get<{total: number}>(`/products/count${(categoria)?`?categoria=${categoria}`:''}`),
 
   encontrarPorId: (id: string) => api.get<Produto>(`/products/find/${id}`)
 

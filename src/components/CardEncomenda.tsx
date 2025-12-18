@@ -1,6 +1,7 @@
 import { Divider, Space, Tag, Typography } from "antd";
 import type React from "react";
 import type { EncomendaResponseBody } from "../types/encomenda.type";
+import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 const { Text, Paragraph } = Typography;
 
 export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ encomenda }) => {
@@ -27,6 +28,8 @@ export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ 
     }
   };
 
+  const { encontrarNomePorId } = useCategoriasProduto();
+
   return (
     <div style={{ paddingBottom: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -44,7 +47,7 @@ export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ 
       </Paragraph>
       <Space split={<Divider type="vertical" />}>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          {encomenda.categoria}
+          {encontrarNomePorId(encomenda.categoria_reference)}
         </Text>
         <Text type="secondary" style={{ fontSize: 12 }}>
           {encomenda.altura}cm x {encomenda.comprimento}cm

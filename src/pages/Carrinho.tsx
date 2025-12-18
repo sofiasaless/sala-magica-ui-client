@@ -1,11 +1,14 @@
 import {
   DeleteOutlined,
   GiftOutlined,
+  LoginOutlined,
   SafetyOutlined,
   ShoppingOutlined,
+  UserOutlined,
   WhatsAppOutlined
 } from '@ant-design/icons';
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -22,9 +25,11 @@ import {
   message
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { colors } from '../theme/colors';
-import type { Produto } from '../types/produto.type';
+import type { ItemCarrinho } from '../types/produto.type';
+import { useNotificacao } from '../providers/NotificacaoProvider';
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -32,19 +37,29 @@ const { useBreakpoint } = Grid;
 export const Carrinho = () => {
   const screens = useBreakpoint();
 
-  const { itensCarrinho, removerItem, limparItens } = useItensCarrinho()
+  const { carrinho, removerItem, limparItens, alterarQuantidade } = useItensCarrinho()
 
-  const shippingCost = itensCarrinho.length >= 150 ? 0 : 15.90;
-  const finalTotal = itensCarrinho.length + shippingCost;
+  const finalTotal = carrinho.reduce((acumulador, item) => {
+    return acumulador + (item.quantidade * item.preco); // Retorna o novo valor do acumulador
+  }, 0);
+
+  const { isAutenticado } = useAuth()
 
   const navigator = useNavigate()
 
-  const handleRemove = (productId: string) => {
-    removerItem(productId);
-    message.success('Item removido do carrinho');
+  const notificacao = useNotificacao()
+
+  const handleRemove = async (item_id: string, productId: string) => {
+    const resultado = await removerItem(item_id, productId);
+    notificacao({
+      message: resultado.message,
+      placement: 'bottom',
+      type: (resultado.ok)?'success':'error'
+    })
   };
 
   const handleWhatsAppCheckout = () => {
+    console.info(carrinho)
     message.success('Pedido enviado para o WhatsApp!');
   };
 
@@ -53,7 +68,7 @@ export const Carrinho = () => {
       title: 'Produto',
       dataIndex: 'product',
       key: 'product',
-      render: (_: unknown, record: Produto) => (
+      render: (_: unknown, record: ItemCarrinho) => (
         <Space>
           <img
             src={record.imagemCapa}
@@ -76,7 +91,7 @@ export const Carrinho = () => {
       title: 'Preço',
       dataIndex: 'price',
       key: 'price',
-      render: (_: unknown, record: Produto) => (
+      render: (_: unknown, record: ItemCarrinho) => (
         <Text style={{ color: colors.primary, fontWeight: 500 }}>
           R$ {record.preco.toFixed(2)}
         </Text>
@@ -86,11 +101,14 @@ export const Carrinho = () => {
       title: 'Quantidade',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (_: unknown, record: Produto) => (
+      render: (_: unknown, record: ItemCarrinho) => (
         <InputNumber
-          min={1}
+          min={0}
           max={10}
-          value={1}
+          value={record.quantidade}
+          onChange={(value) => {
+            alterarQuantidade(value!, record.id!)
+          }}
           size="small"
         />
       )
@@ -99,20 +117,20 @@ export const Carrinho = () => {
       title: 'Subtotal',
       dataIndex: 'subtotal',
       key: 'subtotal',
-      render: (_: unknown, record: Produto) => (
+      render: (_: unknown, record: ItemCarrinho) => (
         <Text strong style={{ color: '#08979C' }}>
-          R$ {(record.preco * 1).toFixed(2)}
+          R$ {(record.preco * record.quantidade).toFixed(2)}
         </Text>
       )
     },
     {
       title: '',
       key: 'actions',
-      render: (_: unknown, record: Produto) => (
+      render: (_: unknown, record: ItemCarrinho) => (
         <Popconfirm
           title="Remover item"
           description="Deseja remover este item do carrinho?"
-          onConfirm={() => handleRemove(record.id!)}
+          onConfirm={() => handleRemove(record.id_item!, record.id!)}
           okText="Sim"
           cancelText="Não"
           okButtonProps={{ danger: true }}
@@ -127,7 +145,7 @@ export const Carrinho = () => {
     }
   ];
 
-  if (itensCarrinho.length === 0) {
+  if (carrinho.length === 0) {
     return (
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <Card style={{ borderRadius: 16, textAlign: 'center', padding: 48 }}>
@@ -173,9 +191,62 @@ export const Carrinho = () => {
         <ShoppingOutlined style={{ marginRight: 12, color: colors.primary }} />
         Meu Carrinho
         <Tag color="cyan" style={{ marginLeft: 12, fontSize: 14 }}>
-          {itensCarrinho.length} {itensCarrinho.length === 1 ? 'item' : 'itens'}
+          {carrinho.length} {carrinho.length === 1 ? 'item' : 'itens'}
         </Tag>
       </Title>
+
+      <Alert
+        message={
+          <Space>
+            <UserOutlined />
+            <span>Você não está logado na Sala Mágica</span>
+          </Space>
+        }
+        description={
+          <div>
+            <Text>
+              Seus itens não poderão ser acessados em outros dispositivos! Entre com sua conta ou faça seu cadastro para acessar seu carrinho de qualquer lugar.
+            </Text>
+            <div style={{ marginTop: 12 }}>
+              <Space>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<LoginOutlined />}
+                  onClick={() => navigator('/entrar')}
+                  style={{
+                    background: colors.primary,
+                    borderColor: colors.primary,
+                    borderRadius: 6
+                  }}
+                >
+                  Entrar
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => navigator('/cadastro')}
+                  style={{
+                    borderColor: colors.primary,
+                    color: colors.primary,
+                    borderRadius: 6
+                  }}
+                >
+                  Criar Conta
+                </Button>
+              </Space>
+            </div>
+          </div>
+        }
+        type="warning"
+        showIcon
+        style={{
+          display: (isAutenticado) ? 'none' : '',
+          marginBottom: 24,
+          borderRadius: 12,
+          background: '#FFFBE6',
+          borderColor: '#FAAD14'
+        }}
+      />
 
       <Row gutter={[24, 24]}>
         {/* Cart Items */}
@@ -183,14 +254,14 @@ export const Carrinho = () => {
           <Card style={{ borderRadius: 16 }}>
             {screens.md ? (
               <Table
-                dataSource={itensCarrinho}
+                dataSource={carrinho}
                 columns={colunas}
                 rowKey={(record) => record.id!}
                 pagination={false}
               />
             ) : (
               <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                {itensCarrinho.map(item => (
+                {carrinho.map(item => (
                   <Card
                     key={item.id}
                     size="small"
@@ -220,19 +291,19 @@ export const Carrinho = () => {
                             <InputNumber
                               min={1}
                               max={10}
-                              value={1}
+                              value={item.quantidade}
                               size="small"
                               style={{ width: 70 }}
                             />
                             <Text strong>
-                              = R$ {(item.preco * 1).toFixed(2)}
+                              = R$ {(item.preco * item.quantidade).toFixed(2)}
                             </Text>
                             <Button
                               type="text"
                               danger
                               size="small"
                               icon={<DeleteOutlined />}
-                              onClick={() => handleRemove(item.id!)}
+                              onClick={() => handleRemove(item.id_item!, item.id!)}
                             />
                           </Space>
                         </div>
@@ -263,7 +334,6 @@ export const Carrinho = () => {
           </Card>
         </Col>
 
-        {/* Order Summary */}
         <Col xs={24} lg={8}>
           <Card
             title={
@@ -275,21 +345,12 @@ export const Carrinho = () => {
             style={{ borderRadius: 16, position: screens.lg ? 'sticky' : 'relative', top: 100 }}
           >
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text type="secondary">Subtotal ({itensCarrinho.length} itens)</Text>
-                <Text>R$ {(32).toFixed(2)}</Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontSize: 24, fontWeight: 600 }}>Total</Text>
+                <Text style={{ fontSize: 24, fontWeight: 600, color: colors.primary }}>R$ {finalTotal.toFixed(2)}</Text>
               </div>
 
-              <Divider style={{ margin: '8px 0' }} />
-
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Title level={3} style={{ marginBottom: 0 }}>Total</Title>
-                <Title level={3} style={{ marginBottom: 0, color: colors.primary }}>
-                  R$ {finalTotal.toFixed(2)}
-                </Title>
-              </div>
-
-              <Text type="secondary" style={{ fontSize: 12 }}>
+              <Text type="secondary" style={{ fontSize: 18 }}>
                 ou 3x de R$ {(finalTotal / 3).toFixed(2)} sem juros
               </Text>
 

@@ -10,6 +10,7 @@ interface ProdutosFavoritosContextType {
   recarregarProdutosFavoritos: () => Promise<void>,
   curtirOuDescurtirProduto: (id_produto: string) => Promise<AxiosResponse>,
   isProdutoFavoritado: (id_produto: string | undefined) => boolean;
+  limparConext: () => void
 }
 
 const ProdutosFavoritosContext = createContext<ProdutosFavoritosContextType | undefined>(undefined);
@@ -45,8 +46,12 @@ export const ProdutosFavoritosProvider = ({ children }: { children: ReactNode })
     return (produtosFavoritos.find(prod => prod.id === id_produto) !== undefined) 
   }
 
+  const limparConext = () => {
+    setProdutosFavoritos([])
+  }
+
   return (
-    <ProdutosFavoritosContext.Provider value={{ produtosFavoritos, carregarProdutosFavoritos, recarregarProdutosFavoritos, curtirOuDescurtirProduto, carregandoFavoritos, isProdutoFavoritado }}>
+    <ProdutosFavoritosContext.Provider value={{ produtosFavoritos, carregarProdutosFavoritos, recarregarProdutosFavoritos, curtirOuDescurtirProduto, carregandoFavoritos, isProdutoFavoritado, limparConext }}>
       {children}
     </ProdutosFavoritosContext.Provider>
   )

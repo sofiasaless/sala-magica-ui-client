@@ -7,18 +7,23 @@ export type Encomenda = {
   imagemReferencia?: string[],
   referencias?: string,
   solicitante: string,
-  pendente?: boolean
+  status?: string
 }
 
 export type EncomendaResponseBody = {
   id?: string,
-  categoria: string,
   altura?: number,
   comprimento?: number,
   descricao: string,
   imagemReferencia?: string[],
+  categoria_reference: string,
   referencias?: string,
   solicitante: string,
-  pendente?: boolean,
+  status: string,
   data_envio: string
 }
+
+export type EncomendaRequestBody = Omit<
+  EncomendaResponseBody, 
+  "data_envio" | "id" | "status"
+>

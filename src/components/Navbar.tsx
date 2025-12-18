@@ -1,5 +1,4 @@
 import {
-  AppstoreOutlined,
   BellOutlined,
   FormOutlined,
   HeartOutlined,
@@ -27,11 +26,11 @@ import {
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useAuth } from '../contexts/AuthContext';
 import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
-import { categories } from '../data/mockData';
-import { SiteFooter } from './SiteFooter';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
-import { useAuthUser } from '../hooks/useAuthUser';
+import { useDicionario } from '../hooks/useDicionario';
+import { SiteFooter } from './SiteFooter';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -41,24 +40,24 @@ export const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { produtosFavoritos } = useProdutosFavoritos();
+  const { produtosFavoritos, limparConext } = useProdutosFavoritos();
 
-  const { desconectarUsuario } = useAuthUser()
+  const { desconectarUsuario } = useAuth()
 
-  const { itensCarrinho } = useItensCarrinho()
+  const { carrinho } = useItensCarrinho()
 
   const screens = useBreakpoint();
 
   const navigate = useNavigate();
 
-  const categoryMenu = (
-    <Menu
-      items={categories.map(cat => ({
-        key: cat,
-        label: cat
-      }))}
-    />
-  );
+  // const categoryMenu = (
+  //   <Menu
+  //     items={categories.map(cat => ({
+  //       key: cat,
+  //       label: cat
+  //     }))}
+  //   />
+  // );
 
   const userMenu = (
     <Menu
@@ -66,18 +65,47 @@ export const Navbar = () => {
         { key: 'perfil', icon: <UserOutlined />, label: 'Meu Perfil', onClick: () => navigate('perfil') },
         { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas' },
         { type: 'divider' as const },
-        { key: 'logout', label: 'Sair', danger: true, onClick: async () => await  desconectarUsuario()}
+        {
+          key: 'logout', label: 'Sair', danger: true, onClick: async () => {
+            await desconectarUsuario();
+            limparConext()
+            window.location.reload()
+          }
+        }
       ]}
     />
   );
 
   const navItems = [
-    { key: 'home', icon: <HomeOutlined />, label: 'Início' },
-    { key: 'custom', icon: <StarOutlined />, label: 'Encomenda' },
-    { key: 'favorites', icon: <HeartOutlined />, label: `Favoritos (${produtosFavoritos?.length})` },
-    { key: 'cart', icon: <ShoppingCartOutlined />, label: `Carrinho (${itensCarrinho.length})` },
-    { key: 'perfil', icon: <UserOutlined />, label: 'Perfil' },
+    { key: '', icon: <HomeOutlined />, label: 'Início', onclick: () => setCurrentPage('') },
+    { key: 'encomenda', icon: <StarOutlined />, label: 'Encomenda', onclick: () => setCurrentPage('encomenda') },
+    { key: 'favoritos', icon: <HeartOutlined />, label: `Favoritos (${produtosFavoritos?.length})`, onclick: () => setCurrentPage('favoritos') },
+    { key: 'carrinho', icon: <ShoppingCartOutlined />, label: `Carrinho (${carrinho.length})`, onclick: () => setCurrentPage('carrinho') },
+    { key: 'perfil', icon: <UserOutlined />, label: 'Perfil', onclick: () => setCurrentPage('perfil') },
   ];
+
+  const { dicionario } = useDicionario()
+  const [options, setOptions] = useState<any[]>([]);
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+
+    if (!value) {
+      setOptions(dicionario?.dictionary_items!);
+      return;
+    }
+
+    const filtered = dicionario?.dictionary_items
+      ?.filter(item =>
+        item.label.toLowerCase().includes(value.toLowerCase())
+      )
+      .map(item => ({
+        label: item.label,
+        value: item.productId
+      }));
+
+    setOptions(filtered || []);
+  };
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#FAFAFA' }}>
@@ -139,25 +167,26 @@ export const Navbar = () => {
           <Space size={10} align='center'>
             <AutoComplete
               value={searchValue}
-              onSelect={(value) => {
-                setSearchValue(value);
-                navigate('');
+              options={options}
+              onSearch={handleSearch}
+              onSelect={(value, option) => {
+                setSearchValue(option.label);
+                navigate(`/produto/${value}`);
               }}
               style={{ width: '100%' }}
             >
               <Input
                 prefix={<SearchOutlined style={{ color: '#08979C' }} />}
                 placeholder="Buscar produtos..."
-                size='large'
-                width={800}
+                size="large"
                 style={{
                   borderRadius: 24,
                   border: 'none',
-                  height: 'auto',
                   fontSize: 14
                 }}
               />
             </AutoComplete>
+
             <Button
               type="text"
               icon={<InboxOutlined />}
@@ -167,7 +196,7 @@ export const Navbar = () => {
               Encomendar
             </Button>
 
-            <Dropdown menu={{ items: categoryMenu.props.items }} placement="bottomRight">
+            {/* <Dropdown menu={{ items: categoryMenu.props.items }} placement="bottomRight">
               <Button
                 type="text"
                 icon={<AppstoreOutlined />}
@@ -175,7 +204,7 @@ export const Navbar = () => {
               >
                 Categorias
               </Button>
-            </Dropdown>
+            </Dropdown> */}
 
             <Button
               type="text"
@@ -202,7 +231,7 @@ export const Navbar = () => {
             <Button
               type="text"
               icon={
-                <Badge count={itensCarrinho.length} size="small" offset={[-2, 2]}>
+                <Badge count={carrinho.length} size="small" offset={[-2, 2]}>
                   <ShoppingCartOutlined style={{ fontSize: 20, color: 'white' }} />
                 </Badge>
               }
@@ -241,6 +270,12 @@ export const Navbar = () => {
         >
           <AutoComplete
             value={searchValue}
+            options={options}
+            onSearch={handleSearch}
+            onSelect={(value, option) => {
+              setSearchValue(option.label);
+              navigate(`/produto/${value}`);
+            }}
             style={{ width: '100%' }}
           >
             <Input

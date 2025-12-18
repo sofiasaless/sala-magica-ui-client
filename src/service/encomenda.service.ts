@@ -1,24 +1,24 @@
-import { HttpStatusCode } from "axios";
+import { AxiosError } from "axios";
 import { encomendasApi } from "../api/modules/encomendas.api";
-import type { Encomenda } from "../types/encomenda.type";
-
-interface RequestResult {
-  status: 'ERROR' | 'SUCCESS',
-  titulo: string,
-  mensagem: string,
-  detalhes?: string
-}
+import type { EncomendaRequestBody, EncomendaResponseBody } from "../types/encomenda.type";
+import { errorHookResponse, successHookResponseByAxios } from "../types/hookResponse.type";
 
 export const EncomendaService = {
-  async enviarEncomenda(encomendaBody: Encomenda): Promise<RequestResult> {
-    const resultado = await encomendasApi.enviarEncomenda(encomendaBody)
-    if (resultado.status === HttpStatusCode.Created) {
-      return {
-        status: 'SUCCESS',
-        titulo: 'Encomenda enviada com sucesso!',
-        mensagem: 'Aguarde a resposta para sua encomenda na caixa de notificações, em breve entraremos em contato!'
-      }
+  async enviarEncomenda(encomendaBody: EncomendaRequestBody) {
+    try {
+      const resultado = await encomendasApi.enviarEncomenda(encomendaBody)
+      return successHookResponseByAxios<EncomendaResponseBody>(resultado, 'enviar encomenda para análise')
+    } catch (error: AxiosError | any) {
+      return errorHookResponse<EncomendaResponseBody>(error);
     }
-    throw new Error('Não foi possível enciar a encomenda!')
+  },
+
+  async encontrarPorUsuario() {
+    try {
+      const resultado = await encomendasApi.encontrarEncomendasPorUsuario();
+      return successHookResponseByAxios<EncomendaResponseBody[]>(resultado, 'buscar encomendas do usuário')      
+    } catch (error: AxiosError | any) {
+      return errorHookResponse<EncomendaResponseBody[]>(error);
+    }
   }
 }

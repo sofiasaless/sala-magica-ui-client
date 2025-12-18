@@ -2,15 +2,15 @@
 import { EditTwoTone, HeartTwoTone, ShoppingTwoTone, SmileTwoTone, StarFilled } from "@ant-design/icons";
 import { Button, Card, Col, Grid, Pagination, Row, Segmented, Typography } from 'antd';
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CardProduto } from "../components/CardProduto";
 import { Carrossel } from "../components/Carrossel";
+import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 import { useProdutosFavoritos } from "../contexts/ProdutosFavoritosContext";
-import { categories } from "../data/mockData";
-import { useAuthUser } from "../hooks/useAuthUser";
 import { useProdutosGeral } from "../hooks/useProdutosGeral";
 import { useProdutosPaginados } from "../hooks/useProdutosPaginados";
 import { colors } from "../theme/colors";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 const { useBreakpoint } = Grid;
 
 const { Title, Text, Paragraph } = Typography;
@@ -20,6 +20,8 @@ export const Inicio = () => {
   const screens = useBreakpoint();
 
   const navigator = useNavigate();
+
+  const { categoriasProdutos } = useCategoriasProduto()
 
   const { produtosPaginados, paginar } = useProdutosPaginados()
   const { contarTotalProdutos, totalProdutos } = useProdutosGeral()
@@ -32,12 +34,13 @@ export const Inicio = () => {
     contarTotalProdutos()
   }, [])
 
-  const { isAutenticado } = useAuthUser();
+  const { isAutenticado } = useAuth()
   const { produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
 
   useEffect(() => {
     if (isAutenticado) {
       if (produtosFavoritos === undefined) carregarProdutosFavoritos();
+      return
     }
   }, [isAutenticado])
 
@@ -80,14 +83,28 @@ export const Inicio = () => {
           <div style={{ overflowX: 'auto', whiteSpace: 'nowrap', paddingBottom: 8 }}>
             <Segmented
               value={selectedCategory}
-              onChange={(value) => {
+              onChange={async (value) => {
                 setSelectedCategory(value as string);
                 setPage(1);
+                if (value === 'Todos') {
+                  await contarTotalProdutos()
+                  await paginar()
+                  return
+                }
+                await contarTotalProdutos(value)
+                await paginar({
+                  params: {
+                    navigation: 'first'
+                  },
+                  filtro: {
+                    categoria: value
+                  }
+                })
               }}
-              options={categories.map(cat => ({
-                label: cat,
-                value: cat
-              }))}
+              options={[{ nome: 'Todos', id: 'Todos', data_criacao: '' }].concat(categoriasProdutos ?? []).map(cat => ({
+                label: cat.nome,
+                value: cat.id,
+              })) || []}
               style={{
                 background: '#F5F5F5',
                 padding: 4,
@@ -123,6 +140,9 @@ export const Inicio = () => {
                     navigation: 'next',
                     cursor: produtosPaginados?.get('')?.nextCursor,
                     cursorPrev: produtosPaginados?.get('')?.prevCursor
+                  },
+                  filtro: {
+                    categoria: selectedCategory
                   }
                 })
               } else {
@@ -135,6 +155,9 @@ export const Inicio = () => {
                     navigation: 'last',
                     cursor: produtosPaginados?.get('')?.nextCursor,
                     cursorPrev: produtosPaginados?.get('')?.prevCursor
+                  },
+                  filtro: {
+                    categoria: selectedCategory
                   }
                 })
               }

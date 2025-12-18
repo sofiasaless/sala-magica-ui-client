@@ -16,8 +16,8 @@ import { useNavigate } from 'react-router-dom';
 import { CardProduto } from '../components/CardProduto';
 import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
-import { useAuthUser } from '../hooks/useAuthUser';
 import { colors } from '../theme/colors';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Title, Text } = Typography;
 
@@ -26,7 +26,7 @@ export function Favoritos() {
   const navigator = useNavigate()
 
   const { carregandoFavoritos, produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
-  const { isAutenticado } = useAuthUser()
+  const { isAutenticado } = useAuth()
 
   if (!isAutenticado) {
     return <NaoConectadoFeedback proposito='favoritar os produtos da Sala Mágica!' />

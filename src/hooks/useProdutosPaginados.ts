@@ -16,6 +16,10 @@ export function useProdutosPaginados() {
           navigation: 'first',
         }
       }
+    } else {
+      if (page.filtro?.categoria === 'Todos') {
+        page.filtro.categoria = '';
+      }
     }
 
     const resultado = await ProdutoService.paginar(page)
