@@ -12,3 +12,18 @@ export function formatarDataPtBR(dateString: string | undefined): string {
     timeZone: "UTC"
   }).format(date);
 }
+
+export function formatarDataHoraAPI(dateString: string) {
+  if (dateString === '') return 'Não informado'
+
+  const date = new Date(dateString);
+
+  const dia = String(date.getDate()).padStart(2, '0');
+  const mes = String(date.getMonth() + 1).padStart(2, '0');
+  const ano = date.getFullYear();
+
+  const horas = String(date.getHours()).padStart(2, '0');
+  const minutos = String(date.getMinutes()).padStart(2, '0');
+
+  return `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+}

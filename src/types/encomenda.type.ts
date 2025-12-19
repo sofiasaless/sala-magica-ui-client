@@ -19,9 +19,11 @@ export type EncomendaResponseBody = {
   categoria_reference: string,
   referencias?: string,
   solicitante: string,
-  status: string,
+  status: EncomendaStatus,
   data_envio: string
 }
+
+export type EncomendaStatus = 'EM ANÁLISE' | 'EM PRODUÇÃO' | 'CANCELADO' | 'FINALIZADO'
 
 export type EncomendaRequestBody = Omit<
   EncomendaResponseBody, 

@@ -2,10 +2,12 @@ import type { User } from "firebase/auth";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { auth } from "../client/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { AuthService } from "../service/auth.service";
 
 interface AuthContextType {
   usuario: User | null;
   isAutenticado: boolean;
+  isAdmin: boolean;
   desconectarUsuario: () => Promise<void>;
 }
 
@@ -14,11 +16,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<User | null>(null);
   const [isAutenticado, setIsAutenticado] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUsuario(user);
       setIsAutenticado(!!user);
+
+      const resultado = await AuthService.verificarAdmin()
+      setIsAdmin(resultado.ok)
     });
 
     // limpa o listener ao desmontar
@@ -31,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, isAutenticado, desconectarUsuario }}>
+    <AuthContext.Provider value={{ usuario, isAutenticado, desconectarUsuario, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

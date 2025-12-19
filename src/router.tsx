@@ -13,6 +13,7 @@ import { Carrinho } from "./pages/Carrinho";
 import { CategoriasProdutoProvider } from "./contexts/CategoriasProdutoContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProdutosFavoritosProvider } from "./contexts/ProdutosFavoritosContext";
+import AdminDashboard from "./pages/AdminDashboard";
 
 export default function Rotas() {
   return (
@@ -34,6 +35,7 @@ export default function Rotas() {
                   <Route path="/carrinho" element={<Carrinho />} />
                   <Route path="/notificacoes" element={<Notificacoes />} />
 
+                  <Route path="/admin" element={<AdminDashboard />} />
                 </Route>
                 <Route path="/entrar" element={<Entrar />} />
                 <Route path="/cadastro" element={<Cadastro />} />

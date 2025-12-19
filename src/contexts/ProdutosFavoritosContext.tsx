@@ -15,7 +15,7 @@ interface ProdutosFavoritosContextType {
 
 const ProdutosFavoritosContext = createContext<ProdutosFavoritosContextType | undefined>(undefined);
 
-export const ProdutosFavoritosProvider = ({ children }: { children: ReactNode, watch: boolean }) => {
+export const ProdutosFavoritosProvider = ({ children }: { children: ReactNode }) => {
   const [produtosFavoritos, setProdutosFavoritos] = useState<Produto[] | undefined>(undefined)
 
   const [carregandoFavoritos, setCarregandoFavoritos] = useState<boolean>(false)
