@@ -19,6 +19,7 @@ export type EncomendaResponseBody = {
   categoria_reference: string,
   referencias?: string,
   solicitante: string,
+  respostas?: RespostasEncomendas[],
   status: EncomendaStatus,
   dataEncomenda: string
 }
@@ -38,4 +39,9 @@ export type EncomendaUpdateRequestBody = Omit<
 export type RespostaEncomendaRequestBody = {
   order: Pick<Encomenda, "id" | "solicitante">,
   response: string
+}
+
+export type RespostasEncomendas = {
+  mensagem: string,
+  data: string
 }

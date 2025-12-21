@@ -1,10 +1,9 @@
-import { BulbOutlined, CheckCircleOutlined, ClockCircleOutlined, FileTextOutlined, LoadingOutlined, RocketOutlined, SendOutlined, StopOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { Alert, Button, Card, Col, Divider, Image, Modal, Popconfirm, Row, Space, Steps, Tag, Typography } from "antd";
+import { BulbOutlined, CheckCircleOutlined, ClockCircleOutlined, FileTextOutlined, HistoryOutlined, LoadingOutlined, RocketOutlined, SendOutlined, StopOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { Alert, Button, Card, Col, Divider, Image, Modal, Popconfirm, Row, Space, Steps, Tag, Timeline, Typography } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import React, { useEffect, useState } from "react";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 import { useEncomendas } from "../hooks/useEncomendas";
-import { useNotificacoes } from "../hooks/useNotificacao";
 import { useNotificacao } from "../providers/NotificacaoProvider";
 import { AiHelperService } from "../service/ai-helper.service";
 import { colors } from "../theme/colors";
@@ -19,7 +18,7 @@ export const ModalEncomendaAdmin: React.FC<{
   selectedOrder: EncomendaResponseBody | null,
   fecharModal: (state: boolean) => void,
   solicitantes: Map<string, string>
-}> = ({orderModalVisible, selectedOrder, fecharModal, solicitantes}) => {
+}> = ({ orderModalVisible, selectedOrder, fecharModal, solicitantes }) => {
 
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
 
@@ -27,7 +26,7 @@ export const ModalEncomendaAdmin: React.FC<{
 
   const { ataulizarEncomenda } = useEncomendas()
 
-  const { enviarNotRespostaEncomenda, isEnviandoResp } = useNotificacoes()
+  const { responderEncomenda, isEnviandoResp } = useEncomendas()
 
   const notificacao = useNotificacao()
 
@@ -48,7 +47,7 @@ export const ModalEncomendaAdmin: React.FC<{
       if (hookRes.ok) setResposta(hookRes.datas?.sugestao!);
       notificacao({
         message: hookRes.message,
-        type: (hookRes.ok)?'success':'error'
+        type: (hookRes.ok) ? 'success' : 'error'
       })
     }
     setIsGeneratingResponse(false)
@@ -58,7 +57,7 @@ export const ModalEncomendaAdmin: React.FC<{
     const hookRes = await ataulizarEncomenda({ status: status }, id_encomenda);
     notificacao({
       message: hookRes.message,
-      type: (hookRes.ok)?'success':'error'
+      type: (hookRes.ok) ? 'success' : 'error'
     })
     if (hookRes.ok && selectedOrder) {
       setStatus(status)
@@ -66,7 +65,7 @@ export const ModalEncomendaAdmin: React.FC<{
   }
 
   const handleResponderEncomenda = async () => {
-    const hookRes = await enviarNotRespostaEncomenda({
+    const hookRes = await responderEncomenda({
       order: {
         solicitante: selectedOrder?.solicitante as string,
         id: selectedOrder?.id!
@@ -75,7 +74,7 @@ export const ModalEncomendaAdmin: React.FC<{
     })
     notificacao({
       message: hookRes.message,
-      type: (hookRes.ok)?'success':'error'
+      type: (hookRes.ok) ? 'success' : 'error'
     })
   }
 
@@ -241,6 +240,35 @@ export const ModalEncomendaAdmin: React.FC<{
               </Popconfirm>
             </Space>
           </Card>
+
+          {selectedOrder.respostas && selectedOrder.respostas.length > 0 && (
+            <Card
+              size="small"
+              title={
+                <Space>
+                  <HistoryOutlined />
+                  <span>Respostas enviadas ({selectedOrder.respostas.length})</span>
+                </Space>
+              }
+              style={{ marginTop: 16 }}
+            >
+              <Timeline
+                items={selectedOrder.respostas.map((resposta, index) => ({
+                  color: 'cyan',
+                  children: (
+                    <div key={index}>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {formatarDataHoraAPI(resposta.data)}
+                      </Text>
+                      <Paragraph style={{ marginBottom: 0, marginTop: 4, whiteSpace: 'pre-wrap' }}>
+                        {resposta.mensagem}
+                      </Paragraph>
+                    </div>
+                  )
+                }))}
+              />
+            </Card>
+          )}
 
           <Card
             size="small"

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { EncomendaRequestBody, EncomendaResponseBody, EncomendaUpdateRequestBody } from "../types/encomenda.type";
+import type { EncomendaRequestBody, EncomendaResponseBody, EncomendaUpdateRequestBody, RespostaEncomendaRequestBody } from "../types/encomenda.type";
 import { errorHookResponse, successHookResponseByAxios } from "../types/hookResponse.type";
 import { EncomendaService, type OrderFilterProps } from "../service/encomenda.service";
 import type { AxiosError } from "axios";
@@ -58,6 +58,16 @@ export function useEncomendas() {
     }
   }
 
+  const [isEnviandoResp, setIsEnviandoResp] = useState<boolean>(false)
+  async function responderEncomenda(payload: RespostaEncomendaRequestBody) {
+    try {
+      const resultado = await EncomendaService.enviarResposta(payload);
+      return successHookResponseByAxios<ContadorQuantidade>(resultado, 'ataulizar encomenda');
+    } catch (error) {
+      return errorHookResponse<ContadorQuantidade>(error);
+    }
+  }
+
   return {
     carregarTodasEncomendas,
     encomendasAdmin,
@@ -65,7 +75,9 @@ export function useEncomendas() {
     encontrarPorUsuario,
     contarEncomendas,
     carregandoEncomendas,
-    ataulizarEncomenda
+    ataulizarEncomenda,
+    responderEncomenda,
+    isEnviandoResp
   }
 
 }

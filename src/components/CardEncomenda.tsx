@@ -1,12 +1,17 @@
-import { Divider, Space, Tag, Typography } from "antd";
+import { Button, Divider, Space, Tag, Typography } from "antd";
 import type React from "react";
 import type { EncomendaResponseBody } from "../types/encomenda.type";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 import { getStatusColor } from "../util/encomenda.util";
+import { EyeOutlined } from "@ant-design/icons";
+import { colors } from "../theme/colors";
 const { Text, Paragraph } = Typography;
 
-export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ encomenda }) => {
-  
+export const CardEncomenda: React.FC<{ 
+  encomenda: EncomendaResponseBody,
+  handleViewOrder: (encomenda: EncomendaResponseBody) => void
+}> = ({ encomenda, handleViewOrder }) => {
+
   const { encontrarNomePorId } = useCategoriasProduto();
 
   return (
@@ -14,7 +19,7 @@ export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ 
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <Text strong>Encomenda #{encomenda.id}</Text>
         <Tag color={getStatusColor(encomenda.status)}>
-          {(encomenda.status === 'NOVA' || encomenda.status === undefined)?'ENVIADA':encomenda.status}
+          {(encomenda.status === 'NOVA' || encomenda.status === undefined) ? 'ENVIADA' : encomenda.status}
         </Tag>
       </div>
       <Paragraph
@@ -35,6 +40,22 @@ export const CardEncomenda: React.FC<{ encomenda: EncomendaResponseBody }> = ({ 
           {new Date().toLocaleDateString('pt-BR')}
         </Text>
       </Space>
+      
+      <div style={{ marginTop: 12 }}>
+        <Button
+          type="primary"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => handleViewOrder(encomenda)}
+          style={{
+            background: colors.primary,
+            borderColor: colors.primary,
+            borderRadius: 6
+          }}
+        >
+          Ver Detalhes
+        </Button>
+      </div>
     </div>
   )
 }
