@@ -128,7 +128,7 @@ export const Inicio = () => {
             defaultCurrent={page}
             total={totalProdutos}
             pageSize={8}
-            simple
+            simple={{ readOnly: true }}
             onChange={(pageClicked) => {
               if (pageClicked > page) {
                 console.log('avançando pagina')

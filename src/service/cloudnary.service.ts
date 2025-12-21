@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const CloudinaryService = {
-  async enviarImagem(imagem: string | File) {
+  async enviarImagem(imagem: string | File): Promise<string> {
     if (!imagem) return '';
   
     const cloudName = import.meta.env.VITE_CLOUDINARY_NAME;

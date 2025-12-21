@@ -19,11 +19,29 @@ export type EncomendaResponseBody = {
   categoria_reference: string,
   referencias?: string,
   solicitante: string,
-  status: string,
-  data_envio: string
+  respostas?: RespostasEncomendas[],
+  status: EncomendaStatus,
+  dataEncomenda: string
 }
+
+export type EncomendaStatus = 'NOVA' | 'EM ANÁLISE' | 'EM PRODUÇÃO' | 'CANCELADO' | 'FINALIZADO'
 
 export type EncomendaRequestBody = Omit<
   EncomendaResponseBody, 
-  "data_envio" | "id" | "status"
+  "dataEncomenda" | "id" | "status"
 >
+
+export type EncomendaUpdateRequestBody = Omit<
+  EncomendaResponseBody, 
+  "dataEncomenda" | "id"
+>
+
+export type RespostaEncomendaRequestBody = {
+  order: Pick<Encomenda, "id" | "solicitante">,
+  response: string
+}
+
+export type RespostasEncomendas = {
+  mensagem: string,
+  data: string
+}

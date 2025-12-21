@@ -2,8 +2,10 @@ import { Avatar, List, Tag } from "antd"
 import { colors } from "../theme/colors"
 import { CheckCircleOutlined, ClockCircleOutlined } from "@ant-design/icons"
 import type React from "react"
+import type { NotificacaoResponseBody } from "../types/notificacao.type"
+import { formatarDataHoraAPI } from "../util/datas.util"
 
-export const ItemNotificacao: React.FC<{notification: any}> = ( { notification } ) => {
+export const ItemNotificacao: React.FC<{notification: NotificacaoResponseBody}> = ( { notification } ) => {
   return (
     <List.Item
       style={{
@@ -19,14 +21,14 @@ export const ItemNotificacao: React.FC<{notification: any}> = ( { notification }
           <Avatar
             style={{
               background:
-                notification.type === 'success'
+                notification.lido === true
                   ? '#52C41A'
-                  : notification.type === 'warning'
+                  : notification.lido === false
                     ? '#FAAD14'
                     : colors.primary
             }}
             icon={
-              notification.type === 'success' ? (
+              notification.lido === true ? (
                 <CheckCircleOutlined />
               ) : (
                 <ClockCircleOutlined />
@@ -34,10 +36,10 @@ export const ItemNotificacao: React.FC<{notification: any}> = ( { notification }
             }
           />
         }
-        title={notification.message}
-        description={new Date(notification.createdAt).toLocaleDateString('pt-BR')}
+        title={notification.titulo}
+        description={formatarDataHoraAPI(notification.dataNotificacao)}
       />
-      {!notification.read && (
+      {!notification.lido && (
         <Tag color="cyan" style={{ marginLeft: 8 }}>Nova</Tag>
       )}
     </List.Item>

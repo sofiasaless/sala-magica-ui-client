@@ -5,6 +5,7 @@ export type Produto = {
   preco: number;
   modelagem: string;
   categoria: string;
+  categoria_reference: string;
   altura?: number;
   comprimento?: number;
   imagemCapa?: string;

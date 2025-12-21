@@ -1,14 +1,23 @@
 import { api } from "../api/axios"
 import { errorHookResponse, successHookResponseByAxios } from "../types/hookResponse.type";
-import type { SugestaoDescricaoRequestBody, SugestaoDescricaoResponseBody } from "../types/sugestao.type"
+import type { SugestaoDescricaoRequestBody, SugestaoResponseBody, SugestaoRespostaEncomendaRequestBody } from "../types/sugestao.type"
 
-export const AiHelper = {
+export const AiHelperService = {
   async sugerirDescricaoEncomenda(payload: SugestaoDescricaoRequestBody) {
     try {
-      const resultado = (await api.post<SugestaoDescricaoResponseBody>(`/ai-helper/suggest-description`, payload));
-      return successHookResponseByAxios<SugestaoDescricaoResponseBody>(resultado, 'gerar sugestão de descrição de encomenda com IA')
+      const resultado = (await api.post<SugestaoResponseBody>(`/ai-helper/order/suggest-description`, payload));
+      return successHookResponseByAxios<SugestaoResponseBody>(resultado, 'gerar sugestão de descrição de encomenda com IA')
     } catch (error) {
-      return errorHookResponse<SugestaoDescricaoResponseBody>(error)
+      return errorHookResponse<SugestaoResponseBody>(error)
+    }
+  },
+
+  async sugerirRespostaEncomenda(payload: SugestaoRespostaEncomendaRequestBody) {
+    try {
+      const resultado = (await api.post<SugestaoResponseBody>(`/ai-helper/order/suggest-response`, payload));
+      return successHookResponseByAxios<SugestaoResponseBody>(resultado, 'gerar sugestão de resposta de encomenda com IA')
+    } catch (error) {
+      return errorHookResponse<SugestaoResponseBody>(error)
     }
   },
 }

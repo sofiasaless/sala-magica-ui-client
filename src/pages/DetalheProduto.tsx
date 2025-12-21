@@ -123,7 +123,7 @@ export function DetalhesProduto() {
                   }}
                 />
               </div>
-              {(produto?.imagens !== undefined && produto?.imagens.length > 1) && (
+              {(produto?.imagens !== undefined && produto?.imagens.length > 0) && (
                 <Space size={8}>
                   {produto?.imagens.map((img, index) => (
                     <Image

@@ -11,6 +11,7 @@ import { useNotificacao } from "../providers/NotificacaoProvider";
 import { colors } from "../theme/colors";
 import type { Produto } from "../types/produto.type";
 import { produtoToItemCarrinho } from "../util/carrinho.util";
+import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -18,7 +19,9 @@ const { useBreakpoint } = Grid;
 export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ produto, fav }) => {
   const navigator = useNavigate()
 
-   const screens = useBreakpoint();
+  const screens = useBreakpoint();
+
+  const { encontrarNomePorId } = useCategoriasProduto()
 
   const [isFav, setIsFav] = useState<boolean>(fav || false)
   const { isAutenticado } = useAuth()
@@ -143,7 +146,7 @@ export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ pr
         color="cyan"
         style={{ marginBottom: 8, borderRadius: 4 }}
       >
-        {produto?.categoria}
+        {encontrarNomePorId(produto?.categoria_reference)}
       </Tag>
 
       <Title

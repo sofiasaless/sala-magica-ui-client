@@ -28,14 +28,14 @@ import {
 } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useCategoriasProduto } from '../contexts/CategoriasProdutoContext';
+import { useEncomendas } from '../hooks/useEncomendas';
 import { useNotificacao } from '../providers/NotificacaoProvider';
 import { CloudinaryService } from '../service/cloudnary.service';
 import { colors } from '../theme/colors';
 import type { EncomendaRequestBody } from '../types/encomenda.type';
-import { EncomendaService } from '../service/encomenda.service';
-import { useAuth } from '../contexts/AuthContext';
-import { AiHelper } from '../service/ai-helper.service';
+import { AiHelperService } from '../service/ai-helper.service';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -57,6 +57,8 @@ export function FormularioEncomenda() {
 
   const { usuario, isAutenticado } = useAuth()
 
+  const { enviar } = useEncomendas()
+
   const handleEnviar = async (valores: EncomendaRequestBody) => {
     const urlsDasImagens = await Promise.all(
       fotos.map((foto) => CloudinaryService.enviarImagem(foto))
@@ -69,7 +71,7 @@ export function FormularioEncomenda() {
       imagemReferencia: urlsDasImagens
     }
 
-    const resultado = await EncomendaService.enviarEncomenda(encomendaFinal);
+    const resultado = await enviar(encomendaFinal);
 
     if (!resultado.ok) {
       floatNotificacao({
@@ -127,7 +129,7 @@ export function FormularioEncomenda() {
 
   const handleAISuggestion = async () => {
     setIsGeneratingSuggestion(true)
-    const resultado = await AiHelper.sugerirDescricaoEncomenda({
+    const resultado = await AiHelperService.sugerirDescricaoEncomenda({
       categoria: encontrarNomePorId(form.getFieldValue('categoria_reference'))!,
       descricaoInicial: form.getFieldValue('descricao')
     })

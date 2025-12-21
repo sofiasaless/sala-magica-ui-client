@@ -3,7 +3,6 @@ import { Button, Card, Form, Input, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthService } from '../service/auth.service';
 import { colors } from '../theme/colors';
-import { useAuth } from '../contexts/AuthContext';
 
 const { Title, Text } = Typography;
 
@@ -17,11 +16,8 @@ const Entrar = () => {
 
   const navigator = useNavigate();
 
-  const { carregarUsuarioAtivo } = useAuth()
-
   const onFinish = async (values: LoginFormValues) => {
     await AuthService.logarUsuario(values.email, values.senha);
-    carregarUsuarioAtivo()
     await navigator('/')
   };
 

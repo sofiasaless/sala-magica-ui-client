@@ -1,6 +1,5 @@
 import { useState } from "react";
-import type { PaginacaoProps } from "../api/modules/produtos.api";
-import { ProdutoService } from "../service/produto.service";
+import { ProdutoService, type PaginacaoProps } from "../service/produto.service";
 import type { PageProductResponse } from "../types/produto.type";
 
 export function useProdutosPaginados() {

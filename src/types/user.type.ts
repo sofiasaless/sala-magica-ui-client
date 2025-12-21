@@ -6,3 +6,11 @@ export type User = {
   displayName: string,
   photoURL: string,
 }
+
+export type UserFirestore = {
+  data_criacao: string
+  email: string
+  foto_perfil: string
+  nome: string
+  telefone: string 
+}

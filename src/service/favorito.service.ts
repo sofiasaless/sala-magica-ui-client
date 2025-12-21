@@ -1,13 +1,14 @@
-import { favoritosApi } from "../api/modules/favoritos.api";
+import { api } from "../api/axios";
+import type { Produto } from "../types/produto.type";
 
 export const FavoritosService = {
   async listarProdutosFavoritados() {
-    const { data } = await favoritosApi.listarTodos();
+    const { data } = await api.get<Produto[]>(`/favorites/findAll`)
     return data
   },
 
   async acaoFavoritar(id_produto: string) {
-    const axiosResultado = await favoritosApi.acaoFavoritar(id_produto);
+    const axiosResultado = await api.post(`/favorites/favAction/${id_produto}`);
     return axiosResultado
   }
 }

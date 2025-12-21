@@ -3,6 +3,13 @@ export type SugestaoDescricaoRequestBody = {
   descricaoInicial: string
 }
 
-export type SugestaoDescricaoResponseBody = {
+export type SugestaoResponseBody = {
   sugestao: string
+}
+
+export type SugestaoRespostaEncomendaRequestBody = {
+  categoria: string,
+  descricao_encomenda: string,
+  cliente_nome: string,
+  status_encomenda: string
 }

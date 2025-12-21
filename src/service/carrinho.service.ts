@@ -1,23 +1,24 @@
-import { cartApi } from "../api/modules/cart.api";
+import { api } from "../api/axios";
+import type { ItemCarrinhoResponseBody } from "../types/produto.type";
 
 export const CarrinhoService = {
   async listarCarrinho() {
-    return await cartApi.listarItens();
+    return await api.get<ItemCarrinhoResponseBody[]>(`/cart/findAll`)
   },
 
   async acaoCarrinho(id_produto: string, quantidade: number) {
-    return await cartApi.acaoCarrinho(id_produto, quantidade);
+    return await api.post(`/cart/cartAction/${id_produto}/${quantidade}`)
   },
 
   async removerItem(id: string) {
-    return await cartApi.removerItem(id);
+    return await api.delete(`/cart/delete/${id}`)
   },
 
   async limparCarrinho() {
-    return await cartApi.limparCarrinho();
+    return await api.delete(`/cart/deleteAll`);
   },
 
   async atualizatQtdItem(id_item: string, quantidade: number) {
-    return await cartApi.atualizarQtdItem(id_item, quantidade);
+    return await api.put(`/cart/itemCart/update/${id_item}/${quantidade}`)
   },
 }

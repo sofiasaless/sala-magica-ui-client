@@ -30,63 +30,50 @@ import {
   Typography
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CardEncomenda } from '../components/CardEncomenda';
 import { ItemNotificacao } from '../components/ItemNotificacao';
 import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
-import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
-import { colors } from '../theme/colors';
-import { formatarDataPtBR } from '../util/datas.util';
-import type { EncomendaResponseBody } from '../types/encomenda.type';
-import { EncomendaService } from '../service/encomenda.service';
-import { useNotificacao } from '../providers/NotificacaoProvider';
 import { useAuth } from '../contexts/AuthContext';
+import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
+import { useEncomendas } from '../hooks/useEncomendas';
+import { useNotificacao } from '../providers/NotificacaoProvider';
+import { colors } from '../theme/colors';
+import type { EncomendaResponseBody } from '../types/encomenda.type';
+import { formatarDataPtBR } from '../util/datas.util';
+import { useNotificacoes } from '../hooks/useNotificacao';
+import { ModalEncomendaUsuario } from '../components/ModalEncomendaUsuario';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-const mockNotificacoes = [
-  {
-    id: 1,
-    message: 'Bem-vindo à Sala Mágica! 🎨',
-    type: 'info',
-    read: false,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 2,
-    message: 'Promoção especial: 15% OFF em murais decorativos!',
-    type: 'success',
-    read: false,
-    createdAt: new Date().toISOString()
-  }
-]
+interface UsuarioProps {
+  tabAtivaNavigation?: string
+}
 
-export function Usuario() {
+export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
   const [form] = Form.useForm();
   const screens = useBreakpoint();
 
   const { usuario, isAutenticado } = useAuth()
 
-  if (!isAutenticado) {
-    return <NaoConectadoFeedback proposito='personalizar seu perfil na Sala Mágica!' />
-  }
-
   const handleAtualizarPerfil = () => {
     message.success('Perfil atualizado com sucesso!');
   };
 
-  const { produtosFavoritos } = useProdutosFavoritos();
+  const { encontrarNtsPorUsuario, notsPorUsuario } = useNotificacoes()
 
-  const navigator = useNavigate()
+  const { produtosFavoritos } = useProdutosFavoritos();
 
   const [usuarioParaAlterar, setUsuarioParaAlterar] = useState(usuario)
 
   const [encomendas, setEncomendas] = useState<EncomendaResponseBody[] | undefined>()
   const floatNotificacao = useNotificacao();
 
+  const { encontrarPorUsuario } = useEncomendas()
+
   const handleListarEncomendas = async () => {
-    const resultado = await EncomendaService.encontrarPorUsuario()
+    const resultado = await encontrarPorUsuario()
 
     if (resultado.ok) {
       setEncomendas(resultado.datas)
@@ -100,9 +87,18 @@ export function Usuario() {
     })
   }
 
+  const [selectedOrder, setSelectedOrder] = useState<EncomendaResponseBody | undefined>(undefined);
+  const [orderModalVisible, setOrderModalVisible] = useState(false);
+
+  const handleViewOrder = (order: EncomendaResponseBody) => {
+    setSelectedOrder(order);
+    setOrderModalVisible(true);
+  };
+
   useEffect(() => {
     setUsuarioParaAlterar(usuario)
     handleListarEncomendas();
+    encontrarNtsPorUsuario()
   }, [usuario])
 
   useEffect(() => {
@@ -115,7 +111,7 @@ export function Usuario() {
     }
   }, [usuarioParaAlterar, form]);
 
-
+  const [tabAtiva, setTabAtiva] = useState<string>(tabAtivaNavigation)
 
   const tabItems = [
     {
@@ -193,7 +189,7 @@ export function Usuario() {
               color: 'green',
               dot: <RocketOutlined />,
               children: (
-                <CardEncomenda encomenda={encomenda} />
+                <CardEncomenda encomenda={encomenda} handleViewOrder={handleViewOrder} />
               )
             }))}
           />
@@ -208,9 +204,11 @@ export function Usuario() {
             </div>
           }
         >
-          <Button type="primary" onClick={() => navigator('/encomenda')}>
-            Fazer Encomenda
-          </Button>
+          <Link to={"/encomenda"}>
+            <Button type="primary">
+              Fazer Encomenda
+            </Button>
+          </Link>
         </Empty>
       )
     },
@@ -225,7 +223,7 @@ export function Usuario() {
       ),
       children: (
         <List
-          dataSource={mockNotificacoes}
+          dataSource={notsPorUsuario}
           renderItem={notification => (
             <ItemNotificacao notification={notification} />
           )}
@@ -233,6 +231,10 @@ export function Usuario() {
       )
     }
   ];
+
+  if (!isAutenticado) {
+    return <NaoConectadoFeedback proposito='personalizar seu perfil na Sala Mágica!' />
+  }
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -269,7 +271,7 @@ export function Usuario() {
                   {produtosFavoritos?.length} Favoritos
                 </Tag>
                 <Tag icon={<ShoppingCartOutlined />} color="cyan">
-                  {2} Encomendas
+                  {encomendas?.length} Encomendas
                 </Tag>
                 <Tag icon={<CheckCircleOutlined />} color="green">
                   Cliente desde {formatarDataPtBR(usuario?.metadata.creationTime)}
@@ -282,10 +284,14 @@ export function Usuario() {
 
       <Card style={{ borderRadius: 16 }}>
         <Tabs
+          activeKey={tabAtiva}
+          onChange={(key) => setTabAtiva(key)}
           items={tabItems}
           size={screens.md ? 'large' : 'middle'}
         />
       </Card>
+
+      <ModalEncomendaUsuario encomendaSelecionada={selectedOrder} fechar={setOrderModalVisible} orderModalVisible={orderModalVisible}/>
     </div>
   );
 };

@@ -28,15 +28,15 @@ export function Favoritos() {
   const { carregandoFavoritos, produtosFavoritos, carregarProdutosFavoritos } = useProdutosFavoritos();
   const { isAutenticado } = useAuth()
 
-  if (!isAutenticado) {
-    return <NaoConectadoFeedback proposito='favoritar os produtos da Sala Mágica!' />
-  }
-
   useEffect(() => {
     if (isAutenticado) {
       if (produtosFavoritos === undefined) carregarProdutosFavoritos();
     }
-  }, [])
+  }, [isAutenticado])
+  
+  if (!isAutenticado) {
+    return <NaoConectadoFeedback proposito='favoritar os produtos da Sala Mágica!' />
+  }
 
   return (
     (produtosFavoritos?.length === 0 && !carregandoFavoritos) ?

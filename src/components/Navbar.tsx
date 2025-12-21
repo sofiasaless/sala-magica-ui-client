@@ -6,6 +6,7 @@ import {
   InboxOutlined,
   MenuOutlined,
   SearchOutlined,
+  SettingOutlined,
   ShoppingCartOutlined,
   StarOutlined,
   UserOutlined
@@ -59,11 +60,14 @@ export const Navbar = () => {
   //   />
   // );
 
+  const { isAdmin } = useAuth()
+
   const userMenu = (
     <Menu
       items={[
         { key: 'perfil', icon: <UserOutlined />, label: 'Meu Perfil', onClick: () => navigate('perfil') },
         { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas' },
+        { key: 'admin-page', icon: <SettingOutlined />, style: { display: (isAdmin)?'':'none' }, label: 'Painel admin', onClick: () => navigate('admin') },
         { type: 'divider' as const },
         {
           key: 'logout', label: 'Sair', danger: true, onClick: async () => {
