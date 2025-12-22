@@ -30,9 +30,10 @@ import {
   Typography
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CardEncomenda } from '../components/CardEncomenda';
 import { ItemNotificacao } from '../components/ItemNotificacao';
+import { ModalEncomendaUsuario } from '../components/ModalEncomendaUsuario';
 import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
 import { useAuth } from '../contexts/AuthContext';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
@@ -41,19 +42,19 @@ import { useNotificacao } from '../providers/NotificacaoProvider';
 import { colors } from '../theme/colors';
 import type { EncomendaResponseBody } from '../types/encomenda.type';
 import { formatarDataPtBR } from '../util/datas.util';
-import { useNotificacoes } from '../hooks/useNotificacao';
-import { ModalEncomendaUsuario } from '../components/ModalEncomendaUsuario';
+import type { NotificacaoResponseBody } from '../types/notificacao.type';
+import { ModalNotificacaoUsuario } from '../components/ModalNotificacaoUsuario';
+import { useNotificacoes } from '../contexts/NotificacoesContext';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface UsuarioProps {
-  tabAtivaNavigation?: string
-}
-
-export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
+export function Usuario() {
   const [form] = Form.useForm();
   const screens = useBreakpoint();
+
+  const location = useLocation();
+  const { tab } = location.state || {};
 
   const { usuario, isAutenticado } = useAuth()
 
@@ -61,7 +62,7 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
     message.success('Perfil atualizado com sucesso!');
   };
 
-  const { encontrarNtsPorUsuario, notsPorUsuario } = useNotificacoes()
+  const { notsPorUsuario } = useNotificacoes()
 
   const { produtosFavoritos } = useProdutosFavoritos();
 
@@ -95,10 +96,17 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
     setOrderModalVisible(true);
   };
 
+  const [selectedNotification, setSelectedNotification] = useState<NotificacaoResponseBody | undefined>(undefined);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+
+  const handleViewNotification = (notification: NotificacaoResponseBody) => {
+    setSelectedNotification(notification);
+    setNotificationModalVisible(true);
+  };
+
   useEffect(() => {
     setUsuarioParaAlterar(usuario)
     handleListarEncomendas();
-    encontrarNtsPorUsuario()
   }, [usuario])
 
   useEffect(() => {
@@ -111,7 +119,11 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
     }
   }, [usuarioParaAlterar, form]);
 
-  const [tabAtiva, setTabAtiva] = useState<string>(tabAtivaNavigation)
+  const [tabAtiva, setTabAtiva] = useState<string>(tab || 'profile')
+
+  useEffect(() => {
+    if (tab) setTabAtiva(tab || 'profile');
+  }, [tab])
 
   const tabItems = [
     {
@@ -225,7 +237,7 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
         <List
           dataSource={notsPorUsuario}
           renderItem={notification => (
-            <ItemNotificacao notification={notification} />
+            <ItemNotificacao handleViewNotification={handleViewNotification} notification={notification} />
           )}
         />
       )
@@ -291,7 +303,9 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
         />
       </Card>
 
-      <ModalEncomendaUsuario encomendaSelecionada={selectedOrder} fechar={setOrderModalVisible} orderModalVisible={orderModalVisible}/>
+      <ModalEncomendaUsuario encomendaSelecionada={selectedOrder} fechar={setOrderModalVisible} orderModalVisible={orderModalVisible} />
+
+      <ModalNotificacaoUsuario fecharModal={() => setNotificationModalVisible(false)} modalVisivel={notificationModalVisible} selectedNotification={selectedNotification}/>
     </div>
   );
 };

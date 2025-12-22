@@ -14,36 +14,39 @@ import { CategoriasProdutoProvider } from "./contexts/CategoriasProdutoContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProdutosFavoritosProvider } from "./contexts/ProdutosFavoritosContext";
 import AdminDashboard from "./pages/AdminDashboard";
+import { NotificacoesProvider } from "./contexts/NotificacoesContext";
 
 export default function Rotas() {
   return (
     <AuthProvider>
-      <CategoriasProdutoProvider>
-        <ProdutosFavoritosProvider>
-          <ItensPedidoProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Navbar />} >
+      <NotificacoesProvider>
+        <CategoriasProdutoProvider>
+          <ProdutosFavoritosProvider>
+            <ItensPedidoProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Navbar />} >
 
-                  <Route path="/" element={<Inicio />} />
-                  <Route path="/favoritos" element={<Favoritos />} />
-                  <Route path="/perfil" element={<Usuario />} />
+                    <Route path="/" element={<Inicio />} />
+                    <Route path="/favoritos" element={<Favoritos />} />
+                    <Route path="/perfil" element={<Usuario />} />
 
-                  <Route path="/produto/:id" element={<DetalhesProduto />} />
-                  <Route path="/encomenda" element={<FormularioEncomenda />}></Route>
+                    <Route path="/produto/:id" element={<DetalhesProduto />} />
+                    <Route path="/encomenda" element={<FormularioEncomenda />}></Route>
 
-                  <Route path="/carrinho" element={<Carrinho />} />
-                  <Route path="/notificacoes" element={<Notificacoes />} />
+                    <Route path="/carrinho" element={<Carrinho />} />
+                    <Route path="/notificacoes" element={<Notificacoes />} />
 
-                  <Route path="/admin" element={<AdminDashboard />} />
-                </Route>
-                <Route path="/entrar" element={<Entrar />} />
-                <Route path="/cadastro" element={<Cadastro />} />
-              </Routes>
-            </BrowserRouter>
-          </ItensPedidoProvider>
-        </ProdutosFavoritosProvider>
-      </CategoriasProdutoProvider>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                  </Route>
+                  <Route path="/entrar" element={<Entrar />} />
+                  <Route path="/cadastro" element={<Cadastro />} />
+                </Routes>
+              </BrowserRouter>
+            </ItensPedidoProvider>
+          </ProdutosFavoritosProvider>
+        </CategoriasProdutoProvider>
+      </NotificacoesProvider>
     </AuthProvider>
   )
 }
