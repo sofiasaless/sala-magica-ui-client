@@ -16,6 +16,7 @@ import { ProdutosFavoritosProvider } from "./contexts/ProdutosFavoritosContext";
 import AdminDashboard from "./pages/AdminDashboard";
 import { NotificacoesProvider } from "./contexts/NotificacoesContext";
 import { EventoAlteracoesProvider } from "./contexts/EventoAlteracoesContext";
+import { AdminGuard } from "./guard/AdminGuard";
 
 export default function Rotas() {
   return (
@@ -39,7 +40,13 @@ export default function Rotas() {
                       <Route path="/carrinho" element={<Carrinho />} />
                       <Route path="/notificacoes" element={<Notificacoes />} />
 
-                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route path="/admin"
+                        element={
+                          <AdminGuard>
+                            <AdminDashboard />
+                          </AdminGuard>
+                        }
+                      />
                     </Route>
                     <Route path="/entrar" element={<Entrar />} />
                     <Route path="/cadastro" element={<Cadastro />} />
