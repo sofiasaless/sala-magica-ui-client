@@ -12,6 +12,7 @@ import { colors } from "../theme/colors";
 import type { Produto } from "../types/produto.type";
 import { produtoToItemCarrinho } from "../util/carrinho.util";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
+import { compartilharProduto } from "../util/compartilhar.util";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -126,8 +127,9 @@ export const CardProduto: React.FC<{ produto?: Produto, fav?: boolean }> = ({ pr
                 shape="circle"
                 size="small"
                 icon={<ShareAltOutlined />}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
+                  if (produto) await compartilharProduto(produto);
                 }}
                 style={{
                   background: 'white',

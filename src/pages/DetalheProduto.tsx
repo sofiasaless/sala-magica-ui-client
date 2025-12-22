@@ -38,6 +38,7 @@ import { useNotificacao } from '../providers/NotificacaoProvider';
 import { colors } from '../theme/colors';
 import { produtoToItemCarrinho } from '../util/carrinho.util';
 import { gerarLinkWhatsAppFazerEncomenda } from '../util/whatsapp.util';
+import { compartilharProduto } from '../util/compartilhar.util';
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -312,6 +313,10 @@ export function DetalhesProduto() {
                 <Button
                   icon={<ShareAltOutlined />}
                   style={{ borderRadius: 8 }}
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    if (produto) await compartilharProduto(produto);
+                  }}
                 >
                   Compartilhar
                 </Button>

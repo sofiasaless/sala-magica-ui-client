@@ -1,6 +1,7 @@
 import type { ItemCarrinho, Produto } from "../types/produto.type";
 
 const telefone = import.meta.env.VITE_ZAP_NUMBER;
+const url = import.meta.env.VITE_URL_MAGIC_ROOM;
 
 function gerarMensagemWhatsApp(produto: Produto) {
   const dimensoes =
@@ -15,7 +16,7 @@ function gerarMensagemWhatsApp(produto: Produto) {
     *Preço:* R$ ${produto.preco.toFixed(2)}\n
 
     🔗 Link do produto:
-    https://salamagica.com/produto/${produto.id}
+    ${url}/produto/${produto.id}
   `.trim();
 }
 
