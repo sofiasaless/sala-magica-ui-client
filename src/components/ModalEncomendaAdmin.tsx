@@ -10,6 +10,7 @@ import { colors } from "../theme/colors";
 import type { EncomendaResponseBody, EncomendaStatus } from "../types/encomenda.type";
 import { formatarDataHoraAPI } from "../util/datas.util";
 import { getStatusColor, getStatusStep } from "../util/encomenda.util";
+import { useEventoAlteracoesContext } from "../contexts/EventoAlteracoesContext";
 
 const { Text, Paragraph } = Typography;
 
@@ -33,6 +34,8 @@ export const ModalEncomendaAdmin: React.FC<{
   const [status, setStatus] = useState<EncomendaStatus>('NOVA')
 
   const [respota, setResposta] = useState<string>('')
+
+  const { eventoAtualizacaoEncomenda } = useEventoAlteracoesContext();
 
   const handleGerarRespostaComIA = async () => {
     setIsGeneratingResponse(true)
@@ -61,6 +64,7 @@ export const ModalEncomendaAdmin: React.FC<{
     })
     if (hookRes.ok && selectedOrder) {
       setStatus(status)
+      eventoAtualizacaoEncomenda()
     }
   }
 
@@ -76,6 +80,7 @@ export const ModalEncomendaAdmin: React.FC<{
       message: hookRes.message,
       type: (hookRes.ok) ? 'success' : 'error'
     })
+    if (hookRes.ok) eventoAtualizacaoEncomenda();
   }
 
   useEffect(() => {
