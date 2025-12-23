@@ -9,6 +9,7 @@ interface AuthContextType {
   isAutenticado: boolean;
   isAdmin: boolean;
   desconectarUsuario: () => Promise<void>;
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,13 +19,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAutenticado, setIsAutenticado] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       setUsuario(user);
       setIsAutenticado(!!user);
 
       const resultado = await AuthService.verificarAdmin()
       setIsAdmin(resultado.ok)
+
+      setLoading(false);
     });
 
     // limpa o listener ao desmontar
@@ -37,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, isAutenticado, desconectarUsuario, isAdmin }}>
+    <AuthContext.Provider value={{ usuario, isAutenticado, desconectarUsuario, isAdmin, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,10 +4,12 @@ import {
   CrownTwoTone,
   FireTwoTone,
   LoadingOutlined,
+  LoginOutlined,
   MessageTwoTone,
   PictureOutlined,
   RocketOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import {
   Alert,
@@ -36,6 +38,7 @@ import { CloudinaryService } from '../service/cloudnary.service';
 import { colors } from '../theme/colors';
 import type { EncomendaRequestBody } from '../types/encomenda.type';
 import { AiHelperService } from '../service/ai-helper.service';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -59,7 +62,12 @@ export function FormularioEncomenda() {
 
   const { enviar } = useEncomendas()
 
+  const navigator = useNavigate()
+
+  const [isEnviando, setIsEnviando] = useState<boolean>(false)
+
   const handleEnviar = async (valores: EncomendaRequestBody) => {
+    setIsEnviando(true)
     const urlsDasImagens = await Promise.all(
       fotos.map((foto) => CloudinaryService.enviarImagem(foto))
     )
@@ -90,6 +98,7 @@ export function FormularioEncomenda() {
     })
 
     form.resetFields();
+    setIsEnviando(false)
 
   }
 
@@ -171,6 +180,59 @@ export function FormularioEncomenda() {
           Descreva o que você imagina e envie para orçamento.
         </Paragraph>
       </div>
+
+      <Alert
+        message={
+          <Space>
+            <UserOutlined />
+            <span>Você não está logado na Sala Mágica</span>
+          </Space>
+        }
+        description={
+          <div>
+            <Text>
+              Para enviar solicitações de encomendas personalizadas, é necessário ter uma conta na Sala Mágica! Entre com sua conta ou faça seu cadastro para enviar quantas encomendas desejar.
+            </Text>
+            <div style={{ marginTop: 12 }}>
+              <Space>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<LoginOutlined />}
+                  onClick={() => navigator('/entrar')}
+                  style={{
+                    background: colors.primary,
+                    borderColor: colors.primary,
+                    borderRadius: 6
+                  }}
+                >
+                  Entrar
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => navigator('/cadastro')}
+                  style={{
+                    borderColor: colors.primary,
+                    color: colors.primary,
+                    borderRadius: 6
+                  }}
+                >
+                  Criar Conta
+                </Button>
+              </Space>
+            </div>
+          </div>
+        }
+        type="warning"
+        showIcon
+        style={{
+          display: (isAutenticado) ? 'none' : '',
+          marginBottom: 24,
+          borderRadius: 12,
+          background: '#FFFBE6',
+          borderColor: '#FAAD14'
+        }}
+      />
 
       <Row gutter={[16, 16]} style={{ marginBottom: 48 }}>
         {benefits.map((benefit, index) => (
@@ -397,6 +459,7 @@ export function FormularioEncomenda() {
                 type='primary'
                 size='large'
                 htmlType="submit"
+                loading={isEnviando}
               >
                 Enviar encomenda para orçamento</Button>
             </Form>

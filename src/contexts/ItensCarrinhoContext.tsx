@@ -26,6 +26,11 @@ export const ItensPedidoProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isAutenticado) {
       carregarCarrinho();
+    } else {
+      const carrinhoStorage = localStorage.getItem('carrinho');
+      if (carrinhoStorage !== null) {
+        setCarrinho(JSON.parse(carrinhoStorage) as ItemCarrinho[]);
+      }
     }
   }, [isAutenticado])
 
@@ -61,21 +66,22 @@ export const ItensPedidoProvider = ({ children }: { children: ReactNode }) => {
         resultadoHook = successHookResponseByAxios<any>(resultado, 'executar ação de adicionar item ao carrinho');
       }
 
-      
+
       if (!isAutenticado) {
         const itemExiste = carrinho.find(it => it.id === item.id);
-        setCarrinho(prev => {
+        const atualizado = () => {
           if (!itemExiste) {
-            return [...prev, { ...item, quantidade: item.quantidade }];
+            return [...carrinho, { ...item, quantidade: item.quantidade }];
           }
-  
-          return prev.map(it =>
+
+          return carrinho.map(it =>
             it.id === item.id
               ? { ...it, quantidade: it.quantidade + item.quantidade }
               : it
           );
-        });
-        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        }
+        setCarrinho(atualizado());
+        localStorage.setItem('carrinho', JSON.stringify(atualizado()));
         resultadoHook = successHookResponse<any>({ message: 'executar ação de adicionar item ao carrinho com visitante', status: 200 });
       }
 
@@ -88,8 +94,9 @@ export const ItensPedidoProvider = ({ children }: { children: ReactNode }) => {
   const removerItem = async (item_id: string, produto_id: string) => {
     try {
       if (!isAutenticado) {
-        setCarrinho(prev => prev.filter(item => item.id !== produto_id))
-        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        const atualizado = carrinho.filter(item => item.id !== produto_id)
+        setCarrinho(atualizado)
+        localStorage.setItem('carrinho', JSON.stringify(atualizado));
         return successHookResponse<any>({ message: 'remover item do carrinho com visitante', status: 200 });
       }
 
@@ -141,6 +148,8 @@ export const ItensPedidoProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (isAutenticado) {
         await CarrinhoService.limparCarrinho();
+      } else {
+        localStorage.setItem('carrinho', JSON.stringify([]))
       }
       setCarrinho([]);
       return successHookResponse<any>({ message: 'Sucesso ao limpar o carrinho', status: 200 })

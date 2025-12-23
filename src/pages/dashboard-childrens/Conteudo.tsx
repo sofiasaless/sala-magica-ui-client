@@ -1,12 +1,27 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
 import { Button, Card, Col, Popconfirm, Row, Space, Tag } from "antd"
 import type { CategoriaResponseBody } from "../../types/cateogiras.type"
+import { useCategoriasProduto } from "../../contexts/CategoriasProdutoContext"
+import { useNotificacao } from "../../providers/NotificacaoProvider"
 
 export const Conteudo: React.FC<{
   handleAddCategory: () => void,
   categorias: CategoriaResponseBody[] | undefined,
   handleEditCategory: (cat: CategoriaResponseBody) => void
-}> = ({handleAddCategory, handleEditCategory, categorias}) => {
+}> = ({ handleAddCategory, handleEditCategory, categorias }) => {
+
+  const { excluirCategoria } = useCategoriasProduto()
+
+  const handleExcluir = async (id: string) => {
+    const res = await excluirCategoria(id)
+    notificacao({
+      message: res.message,
+      type: (res.ok) ? 'info' : 'error'
+    })
+  }
+
+  const notificacao = useNotificacao();
+
   return (
     <Row gutter={[16, 16]}>
       <Col xs={24} md={12}>
@@ -47,7 +62,7 @@ export const Conteudo: React.FC<{
                   <Popconfirm
                     title="Remover categoria?"
                     description="Produtos desta categoria não serão removidos."
-                    // onConfirm={() => handleDeleteCategory(cat)}
+                    onConfirm={() => handleExcluir(cat.id)}
                     okText="Sim"
                     cancelText="Não"
                   >

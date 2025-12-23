@@ -1,11 +1,13 @@
-import { Form, Input, Button, Typography, Card, Upload, message } from 'antd';
-import { MailOutlined, LockOutlined, UserOutlined, PhoneOutlined, CameraOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { CameraOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd';
+import { Button, Card, Form, Input, Typography, Upload, message } from 'antd';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useUsuarios } from '../hooks/useUsuarios';
+import { useNotificacao } from '../providers/NotificacaoProvider';
 import { colors } from '../theme/colors';
 import type { User } from '../types/user.type';
-import { AuthService } from '../service/auth.service';
+import { formatarPadraoBrasil } from '../util/inputphone.util';
 
 const { Title, Text } = Typography;
 
@@ -13,13 +15,38 @@ const Cadastro = () => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
+  const notificacao = useNotificacao()
+
+  const { cadastrarUsuario, isCadastrando } = useUsuarios()
+
+  const navigator = useNavigate()
+
   const onFinish = async (values: User) => {
-    console.log('Register values:', values);
-    try {
-      await AuthService.cadastrarUsuario(values)
-    } catch (error) {
-      console.error('erro ao cadastrar usuario ', error)
+    const telefoneDigitado = form.getFieldValue('phoneNumber');
+
+    const telefoneE164 = formatarPadraoBrasil(telefoneDigitado);
+
+    if (telefoneDigitado && !telefoneE164) {
+      notificacao({
+        message: 'Telefone inválido',
+        description: 'Verifique o formato do telefone informado.',
+        type: 'warning'
+      });
+      return;
     }
+
+    values.phoneNumber = telefoneE164 as string
+
+    const hookRes = await cadastrarUsuario(values)
+    
+    setTimeout(() => {
+      notificacao({
+        message: hookRes.message,
+        type: hookRes.ok ? 'success' : 'warning'
+      })
+    }, 3000)
+
+    navigator('/entrar')
   };
 
   const uploadProps: UploadProps = {
@@ -131,12 +158,25 @@ const Cadastro = () => {
 
           <Form.Item
             name="phoneNumber"
-            label="Telefone (opcional)"
+            label="Telefone"
+            rules={[
+              {
+                validator: (_, value) => {
+                  const regex = /^\(?\d{2}\)?\s?9\d{4}-?\d{4}$/;
+                  if (!regex.test(value)) {
+                    return Promise.reject(
+                      new Error('Informe um telefone válido. Ex: (11) 98765-4321')
+                    );
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Input
-              prefix={<PhoneOutlined style={{ color: colors.textLight }} />}
-              placeholder="(00) 00000-0000"
-              style={{ borderRadius: '8px' }}
+              prefix={<PhoneOutlined />}
+              size="large"
+              placeholder="(11) 98765-4321"
             />
           </Form.Item>
 
@@ -168,6 +208,7 @@ const Cadastro = () => {
                 background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
                 border: 'none'
               }}
+              loading={isCadastrando}
             >
               Criar conta
             </Button>

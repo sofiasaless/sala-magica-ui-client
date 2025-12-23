@@ -1,6 +1,7 @@
 import {
   BellOutlined,
   CheckCircleOutlined,
+  DeleteOutlined,
   EditOutlined,
   HeartOutlined,
   HistoryOutlined,
@@ -16,12 +17,13 @@ import {
   Button,
   Card,
   Col,
+  Divider,
   Empty,
   Form,
   Grid,
   Input,
   List,
-  message,
+  Popconfirm,
   Row,
   Space,
   Tabs,
@@ -30,38 +32,40 @@ import {
   Typography
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CardEncomenda } from '../components/CardEncomenda';
 import { ItemNotificacao } from '../components/ItemNotificacao';
+import { ModalEncomendaUsuario } from '../components/ModalEncomendaUsuario';
+import { ModalNotificacaoUsuario } from '../components/ModalNotificacaoUsuario';
 import { NaoConectadoFeedback } from '../components/NaoConectadoFeedback';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotificacoes } from '../contexts/NotificacoesContext';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
 import { useEncomendas } from '../hooks/useEncomendas';
+import { useUsuarios } from '../hooks/useUsuarios';
 import { useNotificacao } from '../providers/NotificacaoProvider';
 import { colors } from '../theme/colors';
 import type { EncomendaResponseBody } from '../types/encomenda.type';
-import { formatarDataPtBR } from '../util/datas.util';
-import { useNotificacoes } from '../hooks/useNotificacao';
-import { ModalEncomendaUsuario } from '../components/ModalEncomendaUsuario';
+import type { NotificacaoResponseBody } from '../types/notificacao.type';
+import type { UserFirestore } from '../types/user.type';
+import { formatarDataHoraAPI, formatarDataPtBR } from '../util/datas.util';
+import { formatarPadraoBrasil, formatarTelefoneFirebase } from '../util/inputphone.util';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface UsuarioProps {
-  tabAtivaNavigation?: string
-}
-
-export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
-  const [form] = Form.useForm();
+export function Usuario() {
+  const [form] = Form.useForm<UserFirestore>();
   const screens = useBreakpoint();
+
+  const location = useLocation();
+  const { tab } = location.state || {};
 
   const { usuario, isAutenticado } = useAuth()
 
-  const handleAtualizarPerfil = () => {
-    message.success('Perfil atualizado com sucesso!');
-  };
+  const { atualizarUsuario, excluirConta } = useUsuarios();
 
-  const { encontrarNtsPorUsuario, notsPorUsuario } = useNotificacoes()
+  const { notsPorUsuario } = useNotificacoes()
 
   const { produtosFavoritos } = useProdutosFavoritos();
 
@@ -95,23 +99,72 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
     setOrderModalVisible(true);
   };
 
+  const [selectedNotification, setSelectedNotification] = useState<NotificacaoResponseBody | undefined>(undefined);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+
+  const handleViewNotification = (notification: NotificacaoResponseBody) => {
+    setSelectedNotification(notification);
+    setNotificationModalVisible(true);
+  };
+
+  const notificacao = useNotificacao()
+
+  const handleAtualizarPerfil = async () => {
+    const telefoneDigitado = form.getFieldValue('telefone');
+
+    const telefoneE164 = formatarPadraoBrasil(telefoneDigitado);
+
+    if (telefoneDigitado && !telefoneE164) {
+      notificacao({
+        message: 'Telefone inválido',
+        description: 'Verifique o formato do telefone informado.',
+        type: 'warning'
+      });
+      return;
+    }
+
+    const hookRes = await atualizarUsuario({
+      displayName: form.getFieldValue('nome'),
+      phoneNumber: telefoneE164 || undefined
+    });
+
+    notificacao({
+      message: hookRes.message,
+      type: hookRes.ok ? 'info' : 'error'
+    });
+    if (hookRes.ok) window.location.reload();
+  };
+
+
+  const handleExcluirConta = async () => {
+    const hookRes = await excluirConta();
+    notificacao({
+      message: hookRes.message,
+      type: hookRes.ok ? 'info' : 'error'
+    });
+    window.location.reload()
+  }
+
   useEffect(() => {
     setUsuarioParaAlterar(usuario)
     handleListarEncomendas();
-    encontrarNtsPorUsuario()
   }, [usuario])
 
   useEffect(() => {
     if (usuarioParaAlterar) {
       form.setFieldsValue({
-        displayName: usuarioParaAlterar.displayName,
-        email: usuarioParaAlterar.email,
-        phone: usuarioParaAlterar.phoneNumber || 'Não informado'
+        nome: usuarioParaAlterar.displayName as string,
+        telefone: formatarTelefoneFirebase(usuarioParaAlterar.phoneNumber as string) || 'Não informado',
+        email: usuarioParaAlterar.email as string
       });
     }
   }, [usuarioParaAlterar, form]);
 
-  const [tabAtiva, setTabAtiva] = useState<string>(tabAtivaNavigation)
+  const [tabAtiva, setTabAtiva] = useState<string>(tab || 'profile')
+
+  useEffect(() => {
+    if (tab) setTabAtiva(tab || 'profile');
+  }, [tab])
 
   const tabItems = [
     {
@@ -132,7 +185,7 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
             <Row gutter={[16, 0]}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  name="displayName"
+                  name="nome"
                   label="Nome Completo"
                   rules={[{ required: true, message: 'Por favor, preencha com seu nome.' }]}
                 >
@@ -145,16 +198,33 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
                   label="E-mail"
                   rules={[{ required: true, type: 'email', message: 'Por favor, preencha com seu e-mail.' }]}
                 >
-                  <Input prefix={<MailOutlined />} size="large" />
+                  <Input readOnly prefix={<MailOutlined />} size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  name="phone"
+                  name="telefone"
                   label="Telefone"
-                  rules={[{ required: false }]}
+                  rules={[
+                    {
+                      validator: (_, value) => {
+                        if (!value) return Promise.resolve(); // campo opcional
+                        const regex = /^\(?\d{2}\)?\s?9\d{4}-?\d{4}$/;
+                        if (!regex.test(value)) {
+                          return Promise.reject(
+                            new Error('Informe um telefone válido. Ex: (11) 98765-4321')
+                          );
+                        }
+                        return Promise.resolve();
+                      }
+                    }
+                  ]}
                 >
-                  <Input prefix={<PhoneOutlined />} size="large" />
+                  <Input
+                    prefix={<PhoneOutlined />}
+                    size="large"
+                    placeholder="(11) 98765-4321"
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -170,6 +240,27 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
             >
               Salvar Alterações
             </Button>
+
+            <Divider style={{ margin: '32px 0 16px 0' }} />
+
+            <div style={{ textAlign: 'center' }}>
+              <Button
+                type="text"
+                danger
+                size="small"
+                icon={<DeleteOutlined />}
+              >
+                <Popconfirm
+                  title="Tem certeza que deseja excluir sua conta?"
+                  description="Esta ação é irreversível. Todos os seus dados, favoritos e histórico de encomendas serão permanentemente removidos."
+                  onConfirm={handleExcluirConta}
+                  okText="Sim"
+                  cancelText="Não"
+                >
+                  <Button type="text" danger size="small">Excluir minha conta</Button>
+                </Popconfirm>
+              </Button>
+            </div>
           </Form>
         </Card>
       )
@@ -225,7 +316,7 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
         <List
           dataSource={notsPorUsuario}
           renderItem={notification => (
-            <ItemNotificacao notification={notification} />
+            <ItemNotificacao handleViewNotification={handleViewNotification} notification={notification} />
           )}
         />
       )
@@ -274,7 +365,7 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
                   {encomendas?.length} Encomendas
                 </Tag>
                 <Tag icon={<CheckCircleOutlined />} color="green">
-                  Cliente desde {formatarDataPtBR(usuario?.metadata.creationTime)}
+                  Cliente desde {formatarDataHoraAPI(usuario?.metadata.creationTime as string)}
                 </Tag>
               </Space>
             </div>
@@ -291,7 +382,9 @@ export function Usuario({ tabAtivaNavigation = "profile" }: UsuarioProps) {
         />
       </Card>
 
-      <ModalEncomendaUsuario encomendaSelecionada={selectedOrder} fechar={setOrderModalVisible} orderModalVisible={orderModalVisible}/>
+      <ModalEncomendaUsuario encomendaSelecionada={selectedOrder} fechar={setOrderModalVisible} orderModalVisible={orderModalVisible} />
+
+      <ModalNotificacaoUsuario fecharModal={() => setNotificationModalVisible(false)} modalVisivel={notificationModalVisible} selectedNotification={selectedNotification} />
     </div>
   );
 };

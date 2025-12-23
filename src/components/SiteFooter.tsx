@@ -1,12 +1,20 @@
 import { Button, Grid, Layout, Space } from "antd";
-import { categories } from "../data/mockData";
 import { colors } from "../theme/colors";
+import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
+import { Link } from "react-router-dom";
 
 const { Footer } = Layout;
 const { useBreakpoint } = Grid;
 
 export const SiteFooter = () => {
-   const screens = useBreakpoint();
+  const screens = useBreakpoint();
+
+  const { categoriasProdutos } = useCategoriasProduto()
+
+  const linksRapido = [
+    {nome: 'Início', rota: '/'}, 
+    {nome: 'Encomendas', rota: '/perfil'}, 
+  ]
   
   return (
     <Footer
@@ -38,9 +46,9 @@ export const SiteFooter = () => {
         <div>
           <h4 style={{ color: colors.primary, marginBottom: 16, fontWeight: 600 }}>Links Rápidos</h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {['Início', 'Catálogo', 'Encomendas', 'Sobre Nós'].map(link => (
-              <li key={link} style={{ marginBottom: 8 }}>
-                <a style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>{link}</a>
+            {linksRapido.map(link => (
+              <li key={link.rota} style={{ marginBottom: 8 }}>
+                <Link to={link.rota} style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>{link.nome}</Link>
               </li>
             ))}
           </ul>
@@ -49,9 +57,9 @@ export const SiteFooter = () => {
         <div>
           <h4 style={{ color: colors.primary, marginBottom: 16, fontWeight: 600 }}>Categorias</h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {categories.slice(1, 5).map(cat => (
-              <li key={cat} style={{ marginBottom: 8 }}>
-                <a style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>{cat}</a>
+            {categoriasProdutos?.map(cat => (
+              <li key={cat.id} style={{ marginBottom: 8 }}>
+                <a style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>{cat.nome}</a>
               </li>
             ))}
           </ul>
@@ -62,9 +70,6 @@ export const SiteFooter = () => {
           <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, marginBottom: 8 }}>
             📱 (85) 98753-9838
           </p>
-          {/* <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, marginBottom: 8 }}>
-            📧 contato@salamagica.com.br
-          </p> */}
           <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14 }}>
             📍 Baturité, CE
           </p>

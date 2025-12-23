@@ -30,6 +30,7 @@ import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { colors } from '../theme/colors';
 import type { ItemCarrinho } from '../types/produto.type';
 import { useNotificacao } from '../providers/NotificacaoProvider';
+import { gerarLinkWhatsAppCarrinho } from '../util/whatsapp.util';
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -59,8 +60,8 @@ export const Carrinho = () => {
   };
 
   const handleWhatsAppCheckout = () => {
-    console.info(carrinho)
-    message.success('Pedido enviado para o WhatsApp!');
+    const link = gerarLinkWhatsAppCarrinho(carrinho);
+    window.open(link, "_blank");
   };
 
   const colunas = [

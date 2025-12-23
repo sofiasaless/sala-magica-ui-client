@@ -9,6 +9,7 @@ import {
   WhatsAppOutlined
 } from '@ant-design/icons';
 import {
+  Alert,
   Breadcrumb,
   Button,
   Card,
@@ -18,6 +19,7 @@ import {
   Grid,
   Image,
   InputNumber,
+  Result,
   Row,
   Space,
   Tag,
@@ -27,6 +29,7 @@ import { HttpStatusCode } from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useCategoriasProduto } from '../contexts/CategoriasProdutoContext';
 import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
 import { useProdutosGeral } from '../hooks/useProdutosGeral';
@@ -34,6 +37,8 @@ import { useProdutosPaginados } from '../hooks/useProdutosPaginados';
 import { useNotificacao } from '../providers/NotificacaoProvider';
 import { colors } from '../theme/colors';
 import { produtoToItemCarrinho } from '../util/carrinho.util';
+import { gerarLinkWhatsAppFazerEncomenda } from '../util/whatsapp.util';
+import { compartilharProduto } from '../util/compartilhar.util';
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -85,6 +90,35 @@ export function DetalhesProduto() {
     }
   }, [isAutenticado, produto])
 
+  const { encontrarNomePorId } = useCategoriasProduto()
+
+  if (!produto && !carregandoProdutos) {
+    return (
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: 48 }}>
+        <Result
+          status="warning"
+          title="Produto não encontrado"
+          subTitle="O produto que você está procurando não existe ou foi removido do catálogo."
+          extra={[
+            <Button type="primary" key="home" onClick={() => navigator('/')}>
+              Voltar ao Catálogo
+            </Button>,
+            <Button key="contact" onClick={() => navigator('/encomenda')}>
+              Fazer Encomenda Personalizada
+            </Button>
+          ]}
+        />
+        <Alert
+          message="Não encontrou o que procurava?"
+          description="Você pode solicitar uma encomenda personalizada ou entrar em contato conosco pelo WhatsApp."
+          type="info"
+          showIcon
+          style={{ marginTop: 24, borderRadius: 12 }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <Breadcrumb
@@ -97,7 +131,7 @@ export function DetalhesProduto() {
               </span>
             )
           },
-          { title: produto?.categoria },
+          { title: encontrarNomePorId(produto?.categoria_reference) },
           { title: produto?.titulo }
         ]}
       />
@@ -147,7 +181,7 @@ export function DetalhesProduto() {
           <Col xs={24} md={12}>
             <Space direction="vertical" size={16} style={{ width: '100%' }}>
               <div>
-                <Tag color="cyan" style={{ marginBottom: 8 }}>{produto?.categoria}</Tag>
+                <Tag color="cyan" style={{ marginBottom: 8 }}>{encontrarNomePorId(produto?.categoria_reference)}</Tag>
                 <Title level={2} style={{ marginBottom: 8, color: '#262626' }}>
                   {produto?.titulo}
                 </Title>
@@ -255,8 +289,12 @@ export function DetalhesProduto() {
                     height: 48,
                     paddingInline: 24
                   }}
+                  onClick={() => {
+                    let link = gerarLinkWhatsAppFazerEncomenda(produto!)
+                    window.open(link, '_blank')
+                  }}
                 >
-                  WhatsApp
+                  Fazer pedido
                 </Button>
               </Space>
 
@@ -275,6 +313,10 @@ export function DetalhesProduto() {
                 <Button
                   icon={<ShareAltOutlined />}
                   style={{ borderRadius: 8 }}
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    if (produto) await compartilharProduto(produto);
+                  }}
                 >
                   Compartilhar
                 </Button>

@@ -9,5 +9,13 @@ export const UsuarioService = {
 
   async encontrarPorId(id: string) {
     return await api.get<UserFirestore>(`/users/admin/find/${id}`)
+  },
+
+  async atualizarUsuario(body: Partial<User>) {
+    return await api.put(`/users/update/user`, body);
+  },
+
+  async deletarUsuario() {
+    return await api.delete(`/users/delete/user`);
   }
 }

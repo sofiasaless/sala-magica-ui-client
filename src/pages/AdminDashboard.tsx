@@ -40,6 +40,7 @@ import { Conteudo } from './dashboard-childrens/Conteudo';
 import { Encomendas } from './dashboard-childrens/Encomendas';
 import { Produtos } from './dashboard-childrens/Produtos';
 import { VisaoGeral } from './dashboard-childrens/VisaoGeral';
+import { useEventoAlteracoesContext } from '../contexts/EventoAlteracoesContext';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -76,6 +77,8 @@ const AdminDashboard = () => {
 
   const [pageSize] = useState<number>(8)
 
+  const { atualizacaoEncomenda, eventoNovoProduto, novoProduto } = useEventoAlteracoesContext()
+
   const handleAddProduct = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
@@ -107,12 +110,7 @@ const AdminDashboard = () => {
       message: res.message,
       type: (res.ok) ? 'success' : 'error'
     })
-    await paginar({
-      limit: pageSize,
-      params: {
-        navigation: 'first'
-      }
-    })
+    if (res.ok) eventoNovoProduto();
   }
 
   const notificacao = useNotificacao()
@@ -138,7 +136,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     carregarTodasEncomendas()
-  }, [isAutenticado])
+  }, [isAutenticado, atualizacaoEncomenda])
 
   useEffect(() => {
     if (!carregandoEncomendas) carregarSolicitantes();
@@ -173,7 +171,7 @@ const AdminDashboard = () => {
       title: 'Status',
       dataIndex: 'ativo',
       key: 'ativo',
-      render: (ativo: boolean) => <Tag color={(ativo)?'geekblue':'processing'}>{(ativo)?'Ativo':'Inativo'}</Tag>
+      render: (ativo: boolean) => <Tag color={(ativo) ? 'geekblue' : 'processing'}>{(ativo) ? 'Ativo' : 'Inativo'}</Tag>
     },
     {
       title: 'Categoria',
@@ -340,7 +338,7 @@ const AdminDashboard = () => {
       }
     })
     contarTotalProdutos()
-  }, [])
+  }, [novoProduto])
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto' }}>

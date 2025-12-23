@@ -1,9 +1,11 @@
 import { PictureOutlined } from "@ant-design/icons"
 import { Alert, Form, Input, Modal, Space } from "antd"
-import { colors } from "../theme/colors"
 import type React from "react"
-import type { CategoriaResponseBody } from "../types/cateogiras.type"
 import { useEffect } from "react"
+import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext"
+import { useNotificacao } from "../providers/NotificacaoProvider"
+import { colors } from "../theme/colors"
+import type { CategoriaRequestBody, CategoriaResponseBody } from "../types/cateogiras.type"
 
 export const ModalCategoriaAdmin: React.FC<{
   editingCategory: CategoriaResponseBody | null,
@@ -11,7 +13,24 @@ export const ModalCategoriaAdmin: React.FC<{
   open: boolean,
 }> = ({ editingCategory, open, fecharModal }) => {
 
-  const [categoryForm] = Form.useForm<CategoriaResponseBody>();
+  const [categoryForm] = Form.useForm<CategoriaRequestBody>();
+
+  const { atualizarCategoria, adicionarCategoria } = useCategoriasProduto()
+
+  const notificacao = useNotificacao()
+
+  const handleSalvarCategoria = async () => {
+    let res
+    if (editingCategory) {
+      res = await atualizarCategoria(editingCategory.id, categoryForm.getFieldValue('nome'));
+    } else {
+      res = await adicionarCategoria(categoryForm.getFieldValue('nome'));
+    }
+    notificacao({
+      message: res.message,
+      type: (res.ok)?'success':'error'
+    })
+  }
 
   useEffect(() => {
     if (editingCategory) {
@@ -30,7 +49,7 @@ export const ModalCategoriaAdmin: React.FC<{
         </Space>
       }
       open={open}
-      // onOk={handleSaveCategory}
+      onOk={handleSalvarCategoria}
       onCancel={() => fecharModal(false)}
       okText="Salvar"
       cancelText="Cancelar"

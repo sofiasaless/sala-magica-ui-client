@@ -7,7 +7,10 @@ import { errorHookResponse, successHookResponseByAxios, type HookResponse } from
 interface CategoriasProdutoContextType {
   categoriasProdutos: CategoriaResponseBody[] | undefined,
   carregandoCategorias: boolean,
-  encontrarNomePorId: (id: string | undefined) => string | undefined
+  encontrarNomePorId: (id: string | undefined) => string | undefined,
+  adicionarCategoria: (nome: string) => Promise<HookResponse<unknown>>,
+  atualizarCategoria: (id_categoria: string, nome: string) => Promise<HookResponse<unknown>>,
+  excluirCategoria: (id_categoria: string) => Promise<HookResponse<unknown>>,
 }
 
 const CategoriasProdutoContext = createContext<CategoriasProdutoContextType | undefined>(undefined);
@@ -38,8 +41,38 @@ export const CategoriasProdutoProvider = ({ children }: { children: ReactNode })
     return categoriasProdutos?.find(cat => cat.id === id)?.nome
   }
 
+  const atualizarCategoria = async (id_categoria: string, nome: string) => {
+    try {
+      const res = await CategoriaService.atualizar(id_categoria, { nome });
+      await buscarTodas();
+      return successHookResponseByAxios(res, 'atualizar categoria na Sala Mágica');
+    } catch (error) {
+      return errorHookResponse(error);
+    }
+  }
+
+  const adicionarCategoria = async (nome: string) => {
+    try {
+      const res = await CategoriaService.adicionar({ nome });
+      await buscarTodas();
+      return successHookResponseByAxios(res, 'adicionar nova categoria na Sala Mágica');
+    } catch (error) {
+      return errorHookResponse(error);
+    }
+  }
+
+  const excluirCategoria = async (id_categoria: string) => {
+    try {
+      const res = await CategoriaService.excluir(id_categoria);
+      await buscarTodas();
+      return successHookResponseByAxios(res, 'adicionar nova categoria na Sala Mágica');
+    } catch (error) {
+      return errorHookResponse(error);
+    }
+  }
+
   return (
-    <CategoriasProdutoContext.Provider value={{ categoriasProdutos, carregandoCategorias, encontrarNomePorId }}>
+    <CategoriasProdutoContext.Provider value={{ categoriasProdutos, carregandoCategorias, encontrarNomePorId, adicionarCategoria, atualizarCategoria, excluirCategoria }}>
       {children}
     </CategoriasProdutoContext.Provider>
   )

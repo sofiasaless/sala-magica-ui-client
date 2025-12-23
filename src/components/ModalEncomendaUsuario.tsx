@@ -1,10 +1,10 @@
-import { CalendarOutlined, ExpandOutlined, FileTextOutlined, HistoryOutlined, LinkOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Image, Modal, Row, Space, Steps, Tag, Timeline, Typography } from "antd";
+import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExpandOutlined, FileTextOutlined, HistoryOutlined, LinkOutlined, RocketOutlined, StopOutlined } from "@ant-design/icons";
+import { Alert, Button, Card, Col, Image, Modal, Row, Space, Steps, Tag, Timeline, Typography } from "antd";
 import type React from "react";
 import type { EncomendaResponseBody } from "../types/encomenda.type";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
 import { formatarDataHoraAPI } from "../util/datas.util";
-import { getOrderStatusColor, getOrderStatusLabel, getOrderStatusStep } from "../util/encomenda.util";
+import { getOrderStatusColor, getOrderStatusLabel, getOrderStatusStep, getStatusStep } from "../util/encomenda.util";
 
 const { Text, Paragraph } = Typography;
 
@@ -35,18 +35,26 @@ export const ModalEncomendaUsuario: React.FC<{
     >
       {encomendaSelecionada && (
         <div>
-          <Steps
-            current={getOrderStatusStep(encomendaSelecionada.status)}
-            size="small"
-            style={{ marginBottom: 24 }}
-            items={[
-              { title: 'Pendente' },
-              { title: 'Orçamento' },
-              { title: 'Aprovado' },
-              { title: 'Produção' },
-              { title: 'Concluído' }
-            ]}
-          />
+          {encomendaSelecionada.status !== 'CANCELADO' ? (
+            <Steps
+              current={getStatusStep(encomendaSelecionada.status)}
+              size="small"
+              style={{ marginBottom: 24 }}
+              items={[
+                { title: 'Em Análise', icon: <ClockCircleOutlined /> },
+                { title: 'Em Produção', icon: <RocketOutlined /> },
+                { title: 'Finalizado', icon: <CheckCircleOutlined /> }
+              ]}
+            />
+          ) : (
+            <Alert
+              message="Encomenda Cancelada"
+              type="error"
+              showIcon
+              icon={<StopOutlined />}
+              style={{ marginBottom: 24 }}
+            />
+          )}
 
           {encomendaSelecionada.imagemReferencia && (
             <div style={{ marginBottom: 16, textAlign: 'center' }}>

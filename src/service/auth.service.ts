@@ -16,8 +16,7 @@ export const AuthService = {
   },
 
   async cadastrarUsuario(usuario: User | any) {
-    const { data } = await api.post<User>(`/auth/create/user`, usuario)
-    return data
+    return await api.post<User>(`/auth/create/user`, usuario)
   },
 
   async verificarAdmin() {

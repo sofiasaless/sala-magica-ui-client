@@ -32,6 +32,7 @@ import { useItensCarrinho } from '../contexts/ItensCarrinhoContext';
 import { useProdutosFavoritos } from '../contexts/ProdutosFavoritosContext';
 import { useDicionario } from '../hooks/useDicionario';
 import { SiteFooter } from './SiteFooter';
+import { useNotificacoes } from '../contexts/NotificacoesContext';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -51,6 +52,8 @@ export const Navbar = () => {
 
   const navigate = useNavigate();
 
+  const { notsNaoLidas } = useNotificacoes()
+
   // const categoryMenu = (
   //   <Menu
   //     items={categories.map(cat => ({
@@ -66,7 +69,7 @@ export const Navbar = () => {
     <Menu
       items={[
         { key: 'perfil', icon: <UserOutlined />, label: 'Meu Perfil', onClick: () => navigate('perfil') },
-        { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas' },
+        { key: 'orders', icon: <FormOutlined />, label: 'Minhas Encomendas', onClick: () => navigate(`perfil`, { state: { tab: "orders" }}) },
         { key: 'admin-page', icon: <SettingOutlined />, style: { display: (isAdmin)?'':'none' }, label: 'Painel admin', onClick: () => navigate('admin') },
         { type: 'divider' as const },
         {
@@ -143,30 +146,6 @@ export const Navbar = () => {
           <img src={logo} height={65} />
         </div>
 
-        {/* {screens.md && (
-          <div style={{ flex: 1, maxWidth: 500 }}>
-            <AutoComplete
-              value={searchValue}
-              onSelect={(value) => {
-                setSearchValue(value);
-                navigate('');
-              }}
-              style={{ width: '100%' }}
-            >
-              <Input
-                prefix={<SearchOutlined style={{ color: '#08979C' }} />}
-                placeholder="Buscar produtos..."
-                style={{
-                  borderRadius: 24,
-                  border: 'none',
-                  height: 42,
-                  fontSize: 14
-                }}
-              />
-            </AutoComplete>
-          </div>
-        )} */}
-
         {screens.md ? (
           <Space size={10} align='center'>
             <AutoComplete
@@ -200,25 +179,15 @@ export const Navbar = () => {
               Encomendar
             </Button>
 
-            {/* <Dropdown menu={{ items: categoryMenu.props.items }} placement="bottomRight">
-              <Button
-                type="text"
-                icon={<AppstoreOutlined />}
-                style={{ color: 'white', height: 42 }}
-              >
-                Categorias
-              </Button>
-            </Dropdown> */}
-
             <Button
               type="text"
               icon={
-                <Badge count={8} size="small" offset={[-2, 2]}>
+                <Badge count={notsNaoLidas} size="small" offset={[-2, 2]}>
                   <BellOutlined style={{ fontSize: 20, color: 'white' }} />
                 </Badge>
               }
               style={{ color: 'white' }}
-              onClick={() => navigate('notificacoes')}
+              onClick={() => navigate('perfil', { state: { tab: "notifications" } })}
             />
 
             <Button

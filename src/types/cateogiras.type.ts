@@ -3,3 +3,7 @@ export type CategoriaResponseBody = {
   nome: string,
   data_criacao: string
 };
+
+export type CategoriaRequestBody = {
+  nome: string,
+};
