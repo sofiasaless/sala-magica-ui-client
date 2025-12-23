@@ -48,7 +48,7 @@ import { colors } from '../theme/colors';
 import type { EncomendaResponseBody } from '../types/encomenda.type';
 import type { NotificacaoResponseBody } from '../types/notificacao.type';
 import type { UserFirestore } from '../types/user.type';
-import { formatarDataHoraAPI, formatarDataPtBR } from '../util/datas.util';
+import { formatarDataHoraAPI } from '../util/datas.util';
 import { formatarPadraoBrasil, formatarTelefoneFirebase } from '../util/inputphone.util';
 
 const { Title, Text } = Typography;

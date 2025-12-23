@@ -1,10 +1,10 @@
 import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExpandOutlined, FileTextOutlined, HistoryOutlined, LinkOutlined, RocketOutlined, StopOutlined } from "@ant-design/icons";
 import { Alert, Button, Card, Col, Image, Modal, Row, Space, Steps, Tag, Timeline, Typography } from "antd";
 import type React from "react";
-import type { EncomendaResponseBody } from "../types/encomenda.type";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
+import type { EncomendaResponseBody } from "../types/encomenda.type";
 import { formatarDataHoraAPI } from "../util/datas.util";
-import { getOrderStatusColor, getOrderStatusLabel, getOrderStatusStep, getStatusStep } from "../util/encomenda.util";
+import { getOrderStatusColor, getOrderStatusLabel, getStatusStep } from "../util/encomenda.util";
 
 const { Text, Paragraph } = Typography;
 

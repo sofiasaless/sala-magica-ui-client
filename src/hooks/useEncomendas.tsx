@@ -61,10 +61,13 @@ export function useEncomendas() {
   const [isEnviandoResp, setIsEnviandoResp] = useState<boolean>(false)
   async function responderEncomenda(payload: RespostaEncomendaRequestBody) {
     try {
+      setIsEnviandoResp(true)
       const resultado = await EncomendaService.enviarResposta(payload);
-      return successHookResponseByAxios<ContadorQuantidade>(resultado, 'ataulizar encomenda');
+      return successHookResponseByAxios<ContadorQuantidade>(resultado, 'enviar resposta para encomenda');
     } catch (error) {
       return errorHookResponse<ContadorQuantidade>(error);
+    } finally {
+      setIsEnviandoResp(false)
     }
   }
 
