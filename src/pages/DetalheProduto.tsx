@@ -85,10 +85,8 @@ export function DetalhesProduto() {
   }, [id])
 
   useEffect(() => {
-    if (!isFav) {
-      setIsFav(isProdutoFavoritado(produto?.id))
-    }
-  }, [isAutenticado, produto])
+    setIsFav(isProdutoFavoritado(produto?.id))
+  }, [isAutenticado, produto, id])
 
   const { encontrarNomePorId } = useCategoriasProduto()
 
