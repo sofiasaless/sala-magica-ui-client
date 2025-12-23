@@ -59,7 +59,7 @@ export function Favoritos() {
               type="primary"
               size="large"
               icon={<ShoppingOutlined />}
-              onClick={() => navigator('/')}
+              onClick={() => navigator('/#secao-produtos')}
               style={{
                 background: colors.primary,
                 borderColor: colors.primary,

@@ -2,7 +2,7 @@
 import { EditTwoTone, HeartTwoTone, LoadingOutlined, ShoppingTwoTone, SmileTwoTone, StarFilled } from "@ant-design/icons";
 import { Button, Card, Col, Grid, Pagination, Row, Segmented, Spin, Typography } from 'antd';
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CardProduto } from "../components/CardProduto";
 import { Carrossel } from "../components/Carrossel";
 import { useCategoriasProduto } from "../contexts/CategoriasProdutoContext";
@@ -43,6 +43,18 @@ export const Inicio = () => {
       return
     }
   }, [isAutenticado])
+
+  const { hash } = useLocation();
+
+  const [scrollWatcher, setScrollWatcher] = useState<boolean>(true)
+  const handleScrollTop = () => setScrollWatcher(!scrollWatcher)
+
+  useEffect(() => {
+    if (hash) {
+      const el = document.querySelector(hash);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [hash, scrollWatcher]);
 
   return (
     <>
@@ -100,6 +112,7 @@ export const Inicio = () => {
                     categoria: value
                   }
                 })
+                handleScrollTop()
               }}
               options={[{ nome: 'Todos', id: 'Todos', data_criacao: '' }].concat(categoriasProdutos ?? []).map(cat => ({
                 label: cat.nome,
@@ -114,16 +127,16 @@ export const Inicio = () => {
           </div>
         </div>
 
-        <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]} id="secao-produtos">
           {
-            (carregandoPaginados)?
-            <Spin indicator={<LoadingOutlined spin />} size="large" />
-            :
-            produtosPaginados?.get('')?.produtos.map((produto) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={produto.id}>
-                <CardProduto produto={produto} />
-              </Col>
-            ))
+            (carregandoPaginados) ?
+              <Spin indicator={<LoadingOutlined spin />} size="large" />
+              :
+              produtosPaginados?.get('')?.produtos.map((produto) => (
+                <Col xs={24} sm={12} md={8} lg={6} key={produto.id}>
+                  <CardProduto produto={produto} />
+                </Col>
+              ))
           }
         </Row>
 

@@ -1,27 +1,33 @@
 import { RightOutlined } from "@ant-design/icons";
 import { Button, Carousel, Grid, Typography } from "antd";
 import { colors } from "../theme/colors";
+import { useNavigate } from "react-router-dom";
 const { Title, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
 
-const bannerSlides = [
-  {
-    title: 'Transforme sua Sala de Aula!',
-    subtitle: 'Decorações artesanais que encantam e inspiram',
-    background: 'linear-gradient(135deg, #E6FFFB 0%, #B5F5EC 100%)',
-    image: '🎨',
-    btnText: 'Ver produtos',
-  },
-  {
-    title: 'Encomendas Personalizadas',
-    subtitle: 'Criamos o que você imaginar!',
-    background: 'linear-gradient(135deg, #F0F5FF 0%, #ADC6FF 100%)',
-    image: '🌟',
-    btnText: 'Fazer encomenda',
-  }
-];
 
 export function Carrossel() {
+
+  const navigator = useNavigate()
+
+  const bannerSlides = [
+    {
+      title: 'Transforme sua Sala de Aula!',
+      subtitle: 'Decorações artesanais que encantam e inspiram',
+      background: 'linear-gradient(135deg, #E6FFFB 0%, #B5F5EC 100%)',
+      image: '🎨',
+      btnText: 'Ver produtos',
+      onclick: () => navigator("/#secao-produtos")
+    },
+    {
+      title: 'Encomendas Personalizadas',
+      subtitle: 'Criamos o que você imaginar!',
+      background: 'linear-gradient(135deg, #F0F5FF 0%, #ADC6FF 100%)',
+      image: '🌟',
+      btnText: 'Fazer encomenda',
+      onclick: () => navigator("/encomenda")
+    }
+  ];
 
   const screens = useBreakpoint();
 
@@ -76,6 +82,7 @@ export function Carrossel() {
                   paddingInline: 32,
                   fontWeight: 600
                 }}
+                onClick={slide.onclick}
               >
                 {slide.btnText}
               </Button>
